@@ -7,97 +7,116 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-  :root{--ink:#f4f1ff;--muted:rgba(225,235,255,.78);--gold:#ffd77a;--panel:rgba(8,18,66,.66);--line:rgba(255,255,255,.28);--cream1:#fffaf0;--cream2:#f6ecd0;--navy:#17235f}
+  :root{--ink:#f4f1ff;--muted:rgba(225,235,255,.8);--gold:#ffd77a;--panel:rgba(8,18,66,.66);--line:rgba(255,255,255,.28);--cream1:#fffaf0;--cream2:#f6ecd0;--navy:#17235f;--fs:clamp(13px,min(1.15vw,2vh),26px)}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:#1b2f8f;min-height:100dvh;overflow-x:hidden}
   body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
     background:linear-gradient(to bottom,rgba(10,18,70,.55),rgba(10,18,70,.3) 35%,rgba(10,18,70,.55)),url("bg.jpg") 50% 55%/cover no-repeat}
-  .wrap{position:relative;z-index:1;width:100%;min-height:100dvh;padding:10px 16px 12px;display:flex;flex-direction:column;gap:10px}
+  .wrap{position:relative;z-index:1;width:100%;min-height:100dvh;padding:8px 14px 10px;display:flex;flex-direction:column;gap:8px}
   header{display:flex;align-items:center;gap:12px}
-  header h1{flex:1;font-size:clamp(24px,min(4vw,5.4vh),60px);font-weight:900;letter-spacing:.08em;line-height:1.1;
+  header h1{flex:1;font-size:clamp(22px,min(3.4vw,4.6vh),54px);font-weight:900;letter-spacing:.08em;line-height:1.1;
     background:linear-gradient(180deg,#fff 10%,#fff1c4 55%,#e9b44c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 2px 0 rgba(30,40,120,.55)) drop-shadow(0 0 16px rgba(255,220,140,.3))}
   header h1 small{display:block;font-size:.34em;font-weight:500;letter-spacing:.3em;-webkit-text-fill-color:var(--gold)}
-  .btn{font:inherit;font-weight:700;font-size:clamp(14px,min(1.3vw,2.2vh),30px);color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;
-    padding:.5em 1em;border-radius:999px;background:var(--panel);border:1.5px dashed rgba(255,255,255,.5);
-    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .btn{font:inherit;font-weight:700;font-size:var(--fs);color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;
+    padding:.45em .9em;border-radius:999px;background:var(--panel);border:1.5px dashed rgba(255,255,255,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
   .btn:hover,.btn:focus-visible{box-shadow:0 0 16px rgba(255,236,170,.45);outline:none}
   .btn.primary{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy);border:none;box-shadow:0 2px 0 rgba(120,100,40,.25),0 0 18px rgba(255,236,170,.45)}
   .btn:active{transform:scale(.96)}
-  .panel{background:var(--panel);border-radius:26px;border:1.5px solid rgba(255,255,255,.16);
-    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(4,10,50,.3)}
+  .btn.sq{padding:.45em .7em}
+  .panel{background:var(--panel);border-radius:22px;border:1.5px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(4,10,50,.3)}
 
-  /* 五線譜＋這個音 */
-  .top{flex:1;min-height:0;display:grid;grid-template-columns:1fr clamp(150px,17vw,330px);gap:10px}
-  .staffbox{position:relative;min-height:190px;background:linear-gradient(180deg,#fffdf6,#fbf3dc);border-radius:26px;border:3px solid rgba(255,255,255,.85);
-    box-shadow:0 8px 30px rgba(4,10,50,.35);overflow:hidden;touch-action:none}
-  .staffbox svg{position:absolute;inset:0;width:100%;height:100%}
+  /* 樂譜區＋這個音 */
+  .top{flex:1;min-height:0;display:grid;grid-template-columns:1fr clamp(150px,15vw,300px);grid-template-rows:minmax(0,1fr);gap:10px}
+  .staffbox{position:relative;min-height:200px;background:linear-gradient(180deg,#fffdf6,#fbf3dc);border-radius:22px;border:3px solid rgba(255,255,255,.85);
+    box-shadow:0 8px 30px rgba(4,10,50,.35);overflow-y:auto;overflow-x:hidden;touch-action:pan-y;padding:4px 6px 10px;scroll-behavior:smooth}
   .staffbox.over{box-shadow:0 0 0 4px var(--gold),0 8px 30px rgba(4,10,50,.35)}
-  .sl{stroke:#232a66;stroke-width:2.2}
+  .sys{display:block;width:100%;height:auto}
+  .sl{stroke:#232a66;stroke-width:1.8}
   .n{color:#232a66;cursor:grab}
   .n.now{color:#e08a00}
   .n.ok{color:#1c9b6a}
-  .n.cur{color:#e08a00;filter:drop-shadow(0 0 6px rgba(255,180,40,.9))}
-  .n.pre{opacity:.55;color:#e08a00}
-  .slot{fill:rgba(35,42,102,.07)}
-  .lab1{font-size:22px;font-weight:900;fill:#232a66;text-anchor:middle;font-family:inherit}
-  .lab2{font-size:15px;fill:#6a6f9c;text-anchor:middle;font-family:inherit}
-  .hide-lab .lab1,.hide-lab .lab2{display:none}
-  .tip{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:clamp(12px,1.6vh,22px);color:#7b7fa8;pointer-events:none}
+  .n.cur{color:#e08a00;filter:drop-shadow(0 0 5px rgba(255,180,40,.9))}
+  .n.pre{opacity:.5;color:#e08a00}
+  .barbg{fill:transparent;cursor:pointer}
+  .barbg.act{fill:rgba(255,190,60,.13)}
+  .barbg.play{fill:rgba(255,190,60,.24)}
+  .slot{fill:rgba(35,42,102,.06);stroke:rgba(35,42,102,.18);stroke-dasharray:5 5;pointer-events:none}
+  .bnum{font-size:13px;fill:#8a8fb5;font-family:inherit}
+  .tip{position:sticky;top:0;z-index:2;text-align:center;font-size:clamp(12px,1.5vh,20px);color:#7b7fa8;pointer-events:none;padding:2px 0}
 
   .info{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45em;padding:.9em .8em;text-align:center;cursor:pointer;
-    background:linear-gradient(180deg,#fff8d6,#ffe9a2);color:#5a4500;border-radius:24px;border:3px solid rgba(255,255,255,.8);box-shadow:0 8px 30px rgba(4,10,50,.35);
-    font-size:clamp(13px,min(1.3vw,2.3vh),32px)}
+    background:linear-gradient(180deg,#fff8d6,#ffe9a2);color:#5a4500;border-radius:22px;border:3px solid rgba(255,255,255,.8);box-shadow:0 8px 30px rgba(4,10,50,.35);
+    font-size:clamp(13px,min(1.25vw,2.2vh),30px)}
   .info .cap{font-size:.8em;font-weight:700;letter-spacing:.2em;color:#fff;background:#e0a020;border-radius:999px;padding:.2em 1em}
-  .info .big{font-size:3.6em;font-weight:900;line-height:1.05;color:#e08a00}
-  .info .mini{width:62%;max-width:9em;height:auto;background:#fffdf6;border-radius:.6em;box-shadow:inset 0 0 0 2px rgba(90,69,0,.12)}
+  .info .big{font-size:3.2em;font-weight:900;line-height:1.05;color:#e08a00}
+  .info .mini{width:66%;max-width:9em;height:auto;background:#fffdf6;border-radius:.6em;box-shadow:inset 0 0 0 2px rgba(90,69,0,.12)}
   .tiles{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:.4em}
   .tile{display:flex;flex-direction:column;align-items:center;gap:.1em;padding:.35em .3em;border-radius:.7em;background:rgba(255,255,255,.62)}
   .tile.wide{grid-column:1/-1}
   .tile span{font-size:.72em;font-weight:500;opacity:.7;letter-spacing:.1em}
-  .tile b{font-size:1.25em;font-weight:900;line-height:1.2}
+  .tile b{font-size:1.2em;font-weight:900;line-height:1.2}
   .info .q{display:none;flex-direction:column;align-items:center;gap:.3em;font-weight:700}
-  .info .q b{font-size:4.6em;line-height:1;color:#e08a00}
+  .info .q b{font-size:4.4em;line-height:1;color:#e08a00}
   .info .q small{font-size:.8em;font-weight:500;opacity:.7}
   .info.cover>*{display:none}
   .info.cover .q{display:flex}
+
   /* 控制列 */
-  .ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px}
+  .ctrl{display:flex;flex-direction:column;gap:6px;padding:7px 10px}
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .grp{display:inline-flex;align-items:center;gap:5px}
+  .lab{font-size:var(--fs);font-weight:700;color:var(--muted);white-space:nowrap}
   .seg{display:inline-flex;border-radius:999px;overflow:hidden;background:rgba(8,18,66,.5);border:1.5px dashed rgba(255,255,255,.45)}
-  .seg button{font:inherit;font-weight:700;font-size:clamp(13.5px,min(1.25vw,2.1vh),28px);padding:.5em .9em;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:999px;white-space:nowrap}
+  .seg button{font:inherit;font-weight:700;font-size:var(--fs);padding:.42em .75em;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:999px;white-space:nowrap}
   .seg button.on{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy)}
-  .lab{font-size:clamp(13px,min(1.2vw,2vh),26px);font-weight:700;color:var(--muted)}
-  .tray{display:inline-flex;align-items:center;gap:.4em;padding:.3em .9em .3em .5em;border-radius:999px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
-    font-weight:700;font-size:clamp(14px,min(1.3vw,2.2vh),30px);color:var(--navy);background:linear-gradient(180deg,#fff1c4,#ffd77a);box-shadow:0 2px 0 rgba(120,100,40,.3),0 0 18px rgba(255,236,170,.5)}
-  .tray svg{width:1.7em;height:1.7em}
+  select{font:inherit;font-weight:700;font-size:var(--fs);color:var(--navy);background:linear-gradient(180deg,var(--cream1),var(--cream2));border:none;border-radius:999px;padding:.42em .8em;cursor:pointer}
+  .field input{accent-color:var(--gold);width:clamp(70px,8vw,150px)}
+  .tray{display:inline-flex;align-items:center;gap:.35em;padding:.25em .8em .25em .45em;border-radius:999px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
+    font-weight:700;font-size:var(--fs);color:var(--navy);background:linear-gradient(180deg,#fff1c4,#ffd77a);box-shadow:0 2px 0 rgba(120,100,40,.3),0 0 18px rgba(255,236,170,.5)}
+  .tray svg{width:1.8em;height:1.8em}
+  .durs{display:inline-flex;flex-wrap:wrap;gap:3px;padding:3px;border-radius:16px;background:rgba(8,18,66,.5);border:1.5px dashed rgba(255,255,255,.45)}
+  .dur{display:flex;flex-direction:column;align-items:center;justify-content:center;width:clamp(36px,3.3vw,64px);height:clamp(40px,4.4vh,72px);border:0;border-radius:12px;cursor:pointer;
+    background:transparent;color:#fff;font:inherit;padding:0}
+  .dur svg{width:62%;height:68%}
+  .dur small{font-size:clamp(9px,.85vw,15px);font-weight:700;line-height:1;opacity:.85}
+  .dur.on{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy)}
+  .dur:disabled{opacity:.25;cursor:not-allowed}
+  .durs .sep{width:1px;align-self:stretch;background:rgba(255,255,255,.3);margin:4px 2px}
   .ghost{position:fixed;z-index:60;pointer-events:none;width:46px;height:46px;transform:translate(-50%,-50%);color:#e08a00;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
-  .msg{margin-left:auto;font-size:clamp(13px,min(1.25vw,2.1vh),28px);font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(4,10,50,.8);text-align:right}
+  .msg{flex:1;min-width:12em;font-size:var(--fs);font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(4,10,50,.8);min-height:1.4em;padding:0 4px}
+  .keyname{font-weight:900;color:var(--gold);font-size:var(--fs);min-width:4.2em;text-align:center}
 
   /* 鋼琴 */
-  .piano{position:relative;height:clamp(120px,27vh,420px);padding:8px;border-radius:22px;background:#10194f;border:1.5px solid rgba(255,255,255,.2);box-shadow:0 8px 30px rgba(4,10,50,.4);touch-action:none;user-select:none;-webkit-user-select:none}
+  .piano{position:relative;height:clamp(110px,22vh,380px);padding:7px;border-radius:20px;background:#10194f;border:1.5px solid rgba(255,255,255,.2);box-shadow:0 8px 30px rgba(4,10,50,.4);touch-action:none;user-select:none;-webkit-user-select:none}
   .keys{position:relative;width:100%;height:100%;display:flex;gap:3px}
-  .wk{flex:1;position:relative;border-radius:0 0 10px 10px;background:linear-gradient(180deg,#fff,#eef0f8);cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:6%;
+  .wk{flex:1;position:relative;border-radius:0 0 10px 10px;background:linear-gradient(180deg,#fff,#eef0f8);cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:5%;
     box-shadow:inset 0 -6px 0 rgba(0,0,0,.12);transition:transform .06s,background .06s}
-  .wk small{font-size:clamp(11px,1.7vh,22px);font-weight:700;color:var(--kc)}
-  .wk b{font-size:clamp(15px,2.8vh,38px);font-weight:900;color:#232a66;line-height:1.1}
-  .wk em{position:absolute;top:44%;left:6%;font-style:normal;font-size:clamp(9px,1.3vh,16px);font-weight:700;color:#fff;background:#f08a5d;border-radius:6px;padding:1px 5px}
+  .wk small{font-size:clamp(10px,1.5vh,20px);font-weight:700;color:var(--kc)}
+  .wk b{font-size:clamp(13px,2.4vh,34px);font-weight:900;color:#232a66;line-height:1.1}
+  .wk em{position:absolute;top:40%;left:6%;font-style:normal;font-size:clamp(8px,1.2vh,15px);font-weight:700;color:#fff;background:#f08a5d;border-radius:6px;padding:1px 4px}
   .wk.down{background:linear-gradient(180deg,#ffe9a8,#ffd15c);transform:translateY(4px);box-shadow:inset 0 -2px 0 rgba(0,0,0,.15),0 0 18px rgba(255,220,140,.8)}
   .wk.bad{background:linear-gradient(180deg,#ffd0d6,#ff9aa8)}
-  .bk{position:absolute;top:0;width:5%;height:58%;margin-left:-2.5%;border-radius:0 0 7px 7px;background:linear-gradient(180deg,#2a2f4a,#0b0d1c);cursor:pointer;z-index:2;box-shadow:inset 0 -5px 0 rgba(255,255,255,.12),0 3px 6px rgba(0,0,0,.4)}
-  .bk.down{background:linear-gradient(180deg,#6a5a20,#3a3010);transform:translateY(3px)}
+  .bk{position:absolute;top:0;height:58%;border-radius:0 0 7px 7px;background:linear-gradient(180deg,#2a2f4a,#0b0d1c);cursor:pointer;z-index:2;box-shadow:inset 0 -5px 0 rgba(255,255,255,.12),0 3px 6px rgba(0,0,0,.4)}
+  .bk.inkey::after{content:"";position:absolute;left:50%;bottom:8%;width:34%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:var(--gold)}
+  .bk.down{background:linear-gradient(180deg,#8a7420,#4a3c10);transform:translateY(3px)}
+  .bk.bad{background:linear-gradient(180deg,#a84a5a,#5a1f2a)}
 
-  @media (max-width:700px){
+  @media (min-width:761px) and (orientation:landscape){
+    .wrap{height:100dvh}
+    .staffbox{min-height:0}
+  }
+  @media (max-width:760px){
     .top{grid-template-columns:1fr}
     .info{flex-direction:row;flex-wrap:wrap;padding:.5em .7em;gap:.6em}
     .info .cap{display:none}
-    .info .big{font-size:2.4em}
+    .info .big{font-size:2.2em}
     .info .mini{width:4.6em}
     .tiles{flex:1;width:auto;grid-template-columns:1fr 1fr 1.4fr}
     .tile.wide{grid-column:auto}
     .info.cover .q{flex-direction:row;width:100%;justify-content:center} .info .q b{font-size:2em}
-    .staffbox{min-height:210px}
-    .msg{margin-left:0;flex-basis:100%;text-align:left}
-    .bk{width:6%;margin-left:-3%}
+    .staffbox{min-height:240px;max-height:46vh}
+    .dur{width:34px;height:40px}
   }
 </style>
 </head>
@@ -110,8 +129,8 @@
 
   <div class="top">
     <div class="staffbox" id="staffbox">
-      <svg id="staff" viewBox="0 30 1000 250" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="tip" id="tip">先選音符長短，再把金色音符拖到五線譜上，鋼琴會馬上彈出那個音</div>
+      <div class="tip" id="tip">選好音符長短，把金色音符拖到小節裡；點小節可以指定要寫在哪一小節</div>
+      <div id="systems"></div>
     </div>
     <aside class="info cover" id="info" role="button" tabindex="0" aria-live="polite" aria-label="這個音的答案，點一下顯示或蓋住">
       <span class="q"><b>？</b>這是什麼音？<small>點一下看答案</small></span>
@@ -127,16 +146,28 @@
   </div>
 
   <div class="panel ctrl">
-    <div class="tray" id="tray" role="button" aria-label="拖曳音符到五線譜"><svg viewBox="0 0 40 40"><ellipse cx="16" cy="29" rx="9" ry="6.6" transform="rotate(-20 16 29)" fill="currentColor"/><path d="M24 27V5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><span id="trayTxt">拖我到五線譜</span></div>
-    <div class="seg" id="segDur" aria-label="音符長短"><button data-v="2">二分 2拍</button><button data-v="1" class="on">四分 1拍</button><button data-v="0.5">八分 半拍</button><button data-v="r">休止符</button></div>
-        <div class="seg" id="segMode"><button data-v="write" class="on">寫一寫</button><button data-v="find">找一找</button></div>
-    <button class="btn primary" id="randBtn">🎲 隨機出題</button>
-    <div class="seg" id="segMix" aria-label="出題節奏"><button data-v="q" class="on">只出四分</button><button data-v="mix">混合節奏</button></div>
-    <button class="btn" id="undoBtn">↩ 退一個</button>
-    <button class="btn" id="clearBtn">清空</button>
-    <div class="seg" id="segCover" aria-label="這個音的答案"><button data-v="on" class="on">答案先蓋住</button><button data-v="off">直接顯示</button></div>
-    <button class="btn primary" id="playBtn">▶ 播放</button>
-    <span class="msg" id="msg"></span>
+    <div class="row">
+      <span class="grp"><span class="lab">譜號</span><span class="seg" id="segClef"><button data-v="treble" class="on">𝄞 高音</button><button data-v="bass">𝄢 低音</button></span></span>
+      <span class="grp"><span class="lab">調號</span><select id="keySel" aria-label="調號"></select>
+        <button class="btn sq" id="tDown" title="整首往下移調">▼ 降調</button><button class="btn sq" id="tUp" title="整首往上移調">▲ 升調</button></span>
+      <span class="grp"><span class="lab">拍號</span><span class="seg" id="segTime"><button data-v="2/4">2/4</button><button data-v="3/4">3/4</button><button data-v="4/4" class="on">4/4</button><button data-v="3/8">3/8</button><button data-v="6/8">6/8</button></span></span>
+      <span class="grp"><span class="lab">小節</span><button class="btn sq" id="barMinus" aria-label="減少一小節">－</button><b class="keyname" id="barCount" style="min-width:2.4em">2</b><button class="btn sq" id="barPlus" aria-label="增加一小節">＋</button></span>
+      <label class="grp field"><span class="lab">速度</span><input type="range" id="tempo" min="50" max="160" step="2" value="90"><b class="keyname" id="tempoTxt" style="min-width:2.4em">90</b></label>
+    </div>
+    <div class="row">
+      <div class="tray" id="tray" role="button" aria-label="拖曳音符到五線譜"><svg viewBox="0 0 40 40"><ellipse cx="16" cy="29" rx="9" ry="6.6" transform="rotate(-20 16 29)" fill="currentColor"/><path d="M24 27V5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><span id="trayTxt">拖我</span></div>
+      <div class="durs" id="durs" role="group" aria-label="音符長短"></div>
+      <span class="seg" id="segMode"><button data-v="write" class="on">寫一寫</button><button data-v="find">找一找</button></span>
+      <span class="seg" id="segMix"><button data-v="q" class="on">只出四分</button><button data-v="mix">混合節奏</button></span>
+      <button class="btn primary" id="randBtn">🎲 隨機出題</button>
+    </div>
+    <div class="row">
+      <button class="btn" id="undoBtn">↩ 退一個</button>
+      <button class="btn" id="clearBtn">清空</button>
+      <span class="seg" id="segCover"><button data-v="on" class="on">答案先蓋住</button><button data-v="off">直接顯示</button></span>
+      <div class="msg" id="msg"></div>
+      <button class="btn primary" id="playBtn">▶ 依序播放</button>
+    </div>
   </div>
 
   <div class="piano"><div class="keys" id="keys"></div></div>
@@ -145,245 +176,501 @@
 <script>
 (function(){
   const $ = id => document.getElementById(id);
-  /* p = 五線譜位置：0 = 中央 C（下加一線）… 11 = 高音 sol（上加一間）；p = null 是休止符 */
-  const MIDI = [60,62,64,65,67,69,71,72,74,76,77,79];
-  const SOL = ['do','re','mi','fa','sol','la','si'], LET = ['C','D','E','F','G','A','B'];
+  const SVGNS = 'http://www.w3.org/2000/svg';
+
+  /* ================= 樂理資料 ================= */
+  // 音高以「自然音階步數」表示：0 = 中央 C（C4），1 = D4 … 7 = C5，-1 = B3
+  const LETTER = ['C','D','E','F','G','A','B'], SOL = ['do','re','mi','fa','sol','la','si'];
+  const NAT = [0,2,4,5,7,9,11];
   const KC = ['#e4572e','#f08a1c','#d9a400','#3fa34d','#1c9bb5','#3f6fe0','#9b5de5'];
-  const POS = ['下加一線','下加一間','第一線','第一間','第二線','第二間','第三線','第三間','第四線','第四間','第五線','上加一間'];
-  const DNAME = {2:'二分音符', 1:'四分音符', .5:'八分音符'};
-  const num = p => (p%7+1) + (p >= 7 ? '̇' : '');
-  const BEATS = 8, BAR = 4, BW = 98, X = b => 215 + b*BW, PY = p => 210 - (p-2)*12, BEAT_MS = 640;
-  let seq = [], done = [], mode = 'write', cur = 0, preview = null, nowI = -1, playing = false, playT = [];
-  let selDur = 1, selRest = false, randMix = false, coverOn = true;
-  const svg = $('staff'), box = $('staffbox');
+  const mod = (n, m) => ((n % m) + m) % m;
+  const KEYS = [   // 依主音由低到高排列（移調用）
+    {id:'C',  name:'C 大調',  tonic:0, semi:0,  acc:''},
+    {id:'D',  name:'D 大調',  tonic:1, semi:2,  acc:'#FC'},
+    {id:'Eb', name:'E♭ 大調', tonic:2, semi:3,  acc:'bBEA'},
+    {id:'E',  name:'E 大調',  tonic:2, semi:4,  acc:'#FCGD'},
+    {id:'F',  name:'F 大調',  tonic:3, semi:5,  acc:'bB'},
+    {id:'G',  name:'G 大調',  tonic:4, semi:7,  acc:'#F'},
+    {id:'A',  name:'A 大調',  tonic:5, semi:9,  acc:'#FCG'},
+    {id:'Bb', name:'B♭ 大調', tonic:6, semi:10, acc:'bBE'}
+  ];
+  const CLEFS = {
+    treble:{bottom:2,  lo:-2,  hi:14, keyLo:-1,  keyHi:14, sharpPos:[10,7,11,8,5,9,6],   flatPos:[6,9,5,8,4,7,3]},
+    bass:  {bottom:-10,lo:-14, hi:2,  keyLo:-14, keyHi:1,  sharpPos:[-4,-7,-3,-6,-9,-5,-8], flatPos:[-8,-5,-9,-6,-10,-7,-11]}
+  };
+  // 音符長短（以四分音符＝1 拍計）
+  const DURS = [
+    {id:'w',  v:4,   name:'全音符',     lab:'4'},
+    {id:'h.', v:3,   name:'附點二分',   lab:'3'},
+    {id:'h',  v:2,   name:'二分音符',   lab:'2'},
+    {id:'q.', v:1.5, name:'附點四分',   lab:'1.5'},
+    {id:'q',  v:1,   name:'四分音符',   lab:'1'},
+    {id:'e.', v:.75, name:'附點八分',   lab:'¾'},
+    {id:'e',  v:.5,  name:'八分音符',   lab:'½'},
+    {id:'s',  v:.25, name:'十六分音符', lab:'¼'},
+    {id:'W',  v:4,   name:'全休止符',   lab:'4',  rest:true},
+    {id:'H',  v:2,   name:'二分休止符', lab:'2',  rest:true},
+    {id:'Q',  v:1,   name:'四分休止符', lab:'1',  rest:true},
+    {id:'E',  v:.5,  name:'八分休止符', lab:'½',  rest:true},
+    {id:'S',  v:.25, name:'十六分休止符',lab:'¼', rest:true}
+  ];
+  const DBY = Object.fromEntries(DURS.map(d => [d.id, d]));
 
-  /* 排版：一個音符如果塞不進這一小節剩下的拍子，就從下一小節開始 */
-  function layout(list){
-    let b = 0; const pos = [];
-    for (const n of list){ const left = BAR - (b % BAR); if (n.d > left) b += left; pos.push(b); b += n.d; }
-    return {pos, end:b};
-  }
-  const fits = (list) => layout(list).end <= BEATS + 1e-9;
+  /* ================= 狀態 ================= */
+  let clef = 'treble', keyI = 0, num = 4, den = 4, bars = [[], []], active = 0;
+  let selDur = 'q', mode = 'write', randMix = false, coverOn = true, tempo = 90;
+  let cur = null, done = new Set(), nowRef = null, playBar = -1, playing = false, playT = [], preview = null;
+  const barLen = () => num * 4 / den;                         // 一小節有幾個四分音符長
+  const keyAcc = () => { const k = KEYS[keyI]; const t = k.acc[0]; const m = {}; for (const L of k.acc.slice(1)) m[L] = t === '#' ? 1 : -1; return m; };
+  const alter = d => keyAcc()[LETTER[mod(d,7)]] || 0;
+  const midiOf = d => 60 + 12*Math.floor(d/7) + NAT[mod(d,7)] + alter(d);
+  const used = b => bars[b].reduce((a, n) => a + DBY[n.t].v, 0);
+  const left = b => +(barLen() - used(b)).toFixed(4);
+  const accSign = a => a > 0 ? '♯' : a < 0 ? '♭' : '';
 
-  /* ---------- 聲音：鋼琴 ---------- */
+  /* ================= 聲音 ================= */
   let ctx = null;
-  function tone(midi, vel){
+  function tone(midi, vel, len){
     try {
       if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state !== 'running') ctx.resume();
       const t = ctx.currentTime + .005, f = 440*Math.pow(2,(midi-69)/12), out = ctx.createGain(); out.gain.value = vel || .9; out.connect(ctx.destination);
+      const off = t + (len || 2);
       for (let n = 1; n <= 7; n++){
         const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = f*n*(1+.0004*n*n);
         const a = .32*Math.pow(n,-1.2)*Math.exp(-(n-1)*.35);
         g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(a,t+.005); g.gain.setTargetAtTime(0,t+.005,1.1/(1+n*.5));
-        o.connect(g).connect(out); o.start(t); o.stop(t+2.2);
+        if (len) g.gain.setTargetAtTime(0, off, .08);
+        o.connect(g).connect(out); o.start(t); o.stop(off + .8);
       }
     } catch(e){}
   }
+  ['click','touchend'].forEach(ev => addEventListener(ev, () => { if (ctx && ctx.state !== 'running') try { ctx.resume(); } catch(e){} }, true));
 
-  /* ---------- 鋼琴鍵 ---------- */
-  const keys = $('keys'); let downKey = null, downTimer = 0;
-  keys.innerHTML = MIDI.map((m,p) => `<div class="wk" data-p="${p}" style="--kc:${KC[p%7]}">${p===0?'<em>中央C</em>':''}<small>${SOL[p%7]}</small><b>${LET[p%7]}</b></div>`).join('')
-    + [[0,61],[1,63],[3,66],[4,68],[5,70],[7,73],[8,75],[10,78]].map(([i,m]) => `<div class="bk" data-m="${m}" style="left:${(i+1)/12*100}%"></div>`).join('');
-  function press(p, hold){
-    tone(MIDI[p]);
-    if (downKey) downKey.classList.remove('down'); clearTimeout(downTimer);
-    downKey = keys.querySelector(`.wk[data-p="${p}"]`); downKey.classList.add('down');
-    if (!hold) downTimer = setTimeout(release, 380);
-    showInfo(p);
+  /* ================= 鋼琴鍵（隨譜號換音域） ================= */
+  const keysEl = $('keys'); let downEls = [], downTimer = 0;
+  function buildPiano(){
+    const C = CLEFS[clef], whites = [];
+    for (let d = C.keyLo; d <= C.keyHi; d++) whites.push(d);
+    const acc = keyAcc();
+    let h = whites.map(d => { const L = mod(d,7);
+      return `<div class="wk" data-m="${60 + 12*Math.floor(d/7) + NAT[L]}" style="--kc:${KC[L]}">${d === 0 ? '<em>中央C</em>' : ''}<small>${SOL[L]}</small><b>${LETTER[L]}</b></div>`; }).join('');
+    const w = 100 / whites.length;
+    whites.forEach((d, i) => { const L = mod(d,7); if (i === whites.length-1 || L === 2 || L === 6) return;
+      const m = 60 + 12*Math.floor(d/7) + NAT[L] + 1, inkey = acc[LETTER[L]] === 1 || acc[LETTER[mod(d+1,7)]] === -1;
+      h += `<div class="bk${inkey ? ' inkey' : ''}" data-m="${m}" style="left:${(i+1)*w - w*.3}%;width:${w*.6}%"></div>`; });
+    keysEl.innerHTML = h;
   }
-  function release(){ if (downKey) downKey.classList.remove('down'); downKey = null; }
-  keys.addEventListener('pointerdown', e => {
-    const b = e.target.closest('.bk');
-    if (b){ tone(+b.dataset.m); b.classList.add('down'); setTimeout(() => b.classList.remove('down'), 250); return; }
-    const k = e.target.closest('.wk'); if (!k) return;
-    const p = +k.dataset.p;
-    if (mode === 'find') return answer(p, k);
-    press(p); add({p, d:selDur});
+  function lightKey(midi, hold){
+    downEls.forEach(e => e.classList.remove('down')); clearTimeout(downTimer);
+    downEls = [...keysEl.querySelectorAll(`[data-m="${midi}"]`)]; downEls.forEach(e => e.classList.add('down'));
+    if (!hold) downTimer = setTimeout(releaseKey, 380);
+  }
+  function releaseKey(){ downEls.forEach(e => e.classList.remove('down')); downEls = []; }
+  function pressStep(d, hold){ tone(midiOf(d)); lightKey(midiOf(d), hold); showInfo(d); }
+  keysEl.addEventListener('pointerdown', e => {
+    const k = e.target.closest('.wk,.bk'); if (!k) return;
+    const m = +k.dataset.m;
+    if (mode === 'find') return answer(m, k);
+    tone(m); lightKey(m);
+    const C = CLEFS[clef]; let step = null;
+    for (let d = C.lo; d <= C.hi; d++) if (midiOf(d) === m){ step = d; break; }
+    if (step === null){ say(`這個音不在 ${KEYS[keyI].name} 裡，只彈出聲音，不會寫到譜上。`); return; }
+    showInfo(step);
+    if (DBY[selDur].rest){ say('現在選的是休止符，請先選一個音符再按琴鍵。'); return; }
+    addNote({p:step, t:selDur});
   });
-  function add(n){
-    if (!fits(seq.concat([n]))){ say('兩個小節放滿了（或這個音符太長放不下），可以按「退一個」或「清空」。'); return false; }
-    seq.push(n); render(); say(''); return true;
+
+  /* ================= 這個音 ================= */
+  function posName(d){
+    const r = d - CLEFS[clef].bottom;
+    const Z = ['','一','二','三','四','五'];
+    if (r >= 0 && r <= 8) return r % 2 ? `第${Z[(r+1)/2]}間` : `第${Z[r/2+1]}線`;
+    if (r < 0){ const k = -r; return k % 2 ? `下加${Z[(k+1)/2]}間` : `下加${Z[k/2]}線`; }
+    const k = r - 8; return k % 2 ? `上加${Z[(k+1)/2]}間` : `上加${Z[k/2]}線`;
   }
-  function showInfo(p, d){
-    $('iSol').textContent = SOL[p%7]; $('iSol').style.color = KC[p%7];
+  function jianpu(d){
+    const k = KEYS[keyI], ref = clef === 'bass' ? -7 : 0, deg = mod(d - k.tonic, 7) + 1, oct = Math.floor((d - k.tonic - ref) / 7);
+    return deg + (oct > 0 ? '̇'.repeat(oct) : oct < 0 ? '̣'.repeat(-oct) : '');
+  }
+  function showInfo(d){
+    const L = mod(d,7), a = alter(d);
     if (coverOn) $('info').classList.add('cover');
-    $('iLet').textContent = LET[p%7] + (p >= 7 ? '（高音）' : ''); $('iNum').textContent = num(p); $('iPos').textContent = POS[p];
-    { const y = 62 - (p-2)*5; let m = ''; for (let k = 0; k < 5; k++) m += `<path d="M10 ${62-k*10}H110" stroke="#232a66" stroke-width="1.4"/>`;
-      if (p === 0) m += `<path d="M48 ${y}H72" stroke="#232a66" stroke-width="1.4"/>`;
-      m += `<ellipse cx="60" cy="${y}" rx="7" ry="5" transform="rotate(-20 60 ${y})" fill="${KC[p%7]}"/>`; $('iMini').innerHTML = m; }
+    $('iSol').textContent = SOL[L] + accSign(a); $('iSol').style.color = KC[L];
+    $('iLet').textContent = LETTER[L] + accSign(a) + (d === 0 ? '（中央C）' : '');
+    $('iNum').textContent = jianpu(d); $('iPos').textContent = posName(d);
+    const r = d - CLEFS[clef].bottom, y = 62 - r*5; let m = '';
+    for (let k = 0; k < 5; k++) m += `<path d="M10 ${62-k*10}H110" stroke="#232a66" stroke-width="1.4"/>`;
+    for (let q = -2; q >= r; q -= 2) m += `<path d="M48 ${62-q*5}H72" stroke="#232a66" stroke-width="1.4"/>`;
+    for (let q = 10; q <= r; q += 2) m += `<path d="M48 ${62-q*5}H72" stroke="#232a66" stroke-width="1.4"/>`;
+    m += `<ellipse cx="60" cy="${y}" rx="7" ry="5" transform="rotate(-20 60 ${y})" fill="${KC[L]}"/>`;
+    $('iMini').setAttribute('viewBox', `0 ${Math.min(0, y-12)} 120 ${Math.max(84, y+12) - Math.min(0, y-12)}`);
+    $('iMini').innerHTML = m;
   }
 
-  /* ---------- 五線譜繪製 ---------- */
-  function stemUp(i, list){                 // 連在一起的兩個八分音符用同一個方向
-    const m = beamMate(i, list);
-    return m === null ? list[i].p < 6 : (list[i].p + list[m].p)/2 < 6;
+  /* ================= 樂譜繪製 ================= */
+  const S = 18, VW = 1000, Y0 = 50, YB = Y0 + 4*S, VH = 182;
+  const yOf = d => YB - (d - CLEFS[clef].bottom) * S / 2;
+  const perRow = () => { const w = $('staffbox').clientWidth; return w < 560 ? 1 : w > 1350 ? 3 : 2; };
+  function headerW(){ return 72 + KEYS[keyI].acc.length * 14 + 46; }
+  function clefSVG(){
+    if (clef === 'treble') return `<g transform="translate(16 ${Y0-22}) scale(1.215)" fill="none" stroke="#232a66" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 100 C8 104 4 90 14 88 C20 87 22 96 15 97"/><path d="M20 100 C28 98 27 88 25 78 L17 22 C15 8 24 0 27 10 C30 22 20 32 12 42 C2 54 4 72 20 74 C34 75 38 58 26 54 C16 51 10 62 17 68"/></g>`;
+    const y = Y0 + S;
+    return `<g fill="#232a66"><circle cx="24" cy="${y}" r="5.5"/><path d="M20 ${y} C20 ${y-17} 46 ${y-19} 50 ${y-4} C54 ${y+12} 40 ${y+34} 18 ${y+46}" fill="none" stroke="#232a66" stroke-width="4.2" stroke-linecap="round"/>
+      <circle cx="60" cy="${y-S/2}" r="3"/><circle cx="60" cy="${y+S/2}" r="3"/></g>`;
   }
-  function beamMate(i, list, pos){
-    pos = pos || layout(list).pos; const n = list[i];
-    if (!n || n.d !== .5 || n.p === null) return null;
-    const onBeat = Math.abs(pos[i] % 1) < 1e-9, j = onBeat ? i+1 : i-1, o = list[j];
-    if (!o || o.d !== .5 || o.p === null) return null;
-    return Math.abs(pos[j] - pos[i]) === .5 && Math.floor(pos[i]) === Math.floor(pos[j]) ? j : null;
-  }
-  function noteSVG(n, x, cls, i, up, flag){
-    if (n.p === null){
-      return `<g class="n ${cls}" data-i="${i}"><path d="M${x-7} 126 l13 17 l-12 13 l13 16 q-16 -6 -13 11" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="${x-24}" y="60" width="48" height="200" fill="transparent"/></g>`;
-    }
-    const y = PY(n.p), hollow = n.d === 2;
-    let s = `<g class="n ${cls}" data-i="${i}">`;
-    if (n.p === 0) s += `<path d="M${x-26} ${y}H${x+26}" stroke="currentColor" stroke-width="2.4"/>`;
-    s += `<ellipse cx="${x}" cy="${y}" rx="${hollow?13.5:15}" ry="${hollow?9.2:10.6}" transform="rotate(-20 ${x} ${y})" fill="${hollow?'#fffdf6':'currentColor'}" stroke="currentColor" stroke-width="${hollow?4:0}"/>`;
-    const sx = up ? x+13.5 : x-13.5, sy0 = up ? y-3 : y+3, sy1 = up ? y-72 : y+72;
-    s += `<path d="M${sx} ${sy0}V${sy1}" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`;
-    if (flag) s += up ? `<path d="M${sx} ${sy1} q3 18 16 26 q6 8 0 20" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>`
-                      : `<path d="M${sx} ${sy1} q3 -18 16 -26 q6 -8 0 -20" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>`;
-    const hw = Math.min(40, n.d*BW/2 - 1);
-    s += `<rect x="${x-hw}" y="60" width="${hw*2}" height="200" fill="transparent"/></g>`;
+  function keySigSVG(){
+    const k = KEYS[keyI], t = k.acc[0], C = CLEFS[clef]; let s = '';
+    [...k.acc.slice(1)].forEach((_, i) => { const x = 82 + i*14, y = yOf(t === '#' ? C.sharpPos[i] : C.flatPos[i]);
+      s += t === '#' ? `<path d="M${x-2.5} ${y-11}V${y+12}M${x+2.5} ${y-12}V${y+11}" stroke="#232a66" stroke-width="1.5"/><path d="M${x-6} ${y-2}L${x+6} ${y-6}M${x-6} ${y+6}L${x+6} ${y+2}" stroke="#232a66" stroke-width="3.4"/>`
+                     : `<path d="M${x-3} ${y-20}V${y+5}" stroke="#232a66" stroke-width="1.7"/><path d="M${x-3} ${y+5}C${x+8} ${y-1} ${x+8} ${y-9} ${x-3} ${y-3}" fill="none" stroke="#232a66" stroke-width="2.3"/>`; });
     return s;
   }
-  function render(){
-    const list = seq.slice(); let pvI = -1;
-    if (preview){ if (preview.i === -1){ list.push(preview.n); pvI = list.length-1; } else { list[preview.i] = Object.assign({}, list[preview.i], {p:preview.n.p}); pvI = preview.i; } }
-    const {pos, end} = layout(list);
-    let s = '';
-    for (let k = 0; k < 5; k++) s += `<path class="sl" d="M40 ${210-k*24}H975"/>`;
-    s += `<g transform="translate(62 84) scale(1.62)" fill="none" stroke="#232a66" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 100 C8 104 4 90 14 88 C20 87 22 96 15 97"/><path d="M20 100 C28 98 27 88 25 78 L17 22 C15 8 24 0 27 10 C30 22 20 32 12 42 C2 54 4 72 20 74 C34 75 38 58 26 54 C16 51 10 62 17 68"/></g>`;
-    const barX = X(BAR) - BW/2 + 4;
-    s += `<path class="sl" d="M${barX} 114V210"/><path class="sl" d="M962 114V210"/><path d="M972 114V210" stroke="#232a66" stroke-width="6"/>`;
-    if (mode === 'write' && end < BEATS) s += `<rect class="slot" x="${X(end)-30}" y="96" width="${(BEATS-end)*BW - 30}" height="150" rx="14"/>`;
-    list.forEach((n, i) => {
-      const x = X(pos[i]) + (n.d === .5 ? -8 : 0);
-      const cls = i === pvI ? 'pre' : i === nowI ? 'now' : mode === 'find' ? (done[i] ? 'ok' : i === cur ? 'cur' : '') : '';
-      const mate = beamMate(i, list, pos), up = n.p === null ? true : stemUp(i, list);
-      s += noteSVG(n, x, cls, i, up, n.d === .5 && mate === null);
-      if (mate !== null && mate > i){
-        const m = list[mate], x2 = X(pos[mate]) - 8, y1 = PY(n.p) + (up ? -72 : 72), y2 = PY(m.p) + (up ? -72 : 72), o = up ? 13.5 : -13.5;
-        s += `<path class="n ${cls}" d="M${x+o} ${y1}L${x2+o} ${y2}" stroke="currentColor" stroke-width="9" style="pointer-events:none"/>`;
-      }
+  function timeSVG(){
+    const x = headerW() - 26, f = 'font-family="Georgia,Times New Roman,serif" font-size="38" font-weight="900" fill="#232a66" text-anchor="middle"';
+    return `<text x="${x}" y="${Y0+S+13}" ${f}>${num}</text><text x="${x}" y="${Y0+3*S+13}" ${f}>${den}</text>`;
+  }
+  function restSVG(t, x){
+    const m = Y0 + 2*S;
+    if (t === 'W') return `<rect x="${x-10}" y="${Y0+S}" width="20" height="${S/2}" fill="currentColor"/>`;
+    if (t === 'H') return `<rect x="${x-10}" y="${m-S/2}" width="20" height="${S/2}" fill="currentColor"/>`;
+    if (t === 'Q') return `<path d="M${x-4} ${m-24}l9 12l-8 9l9 11q-11 -4 -9 8" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const one = (yy) => `<circle cx="${x-4}" cy="${yy}" r="3.6" fill="currentColor"/><path d="M${x-4} ${yy+1}Q${x+2} ${yy+3} ${x+7} ${yy-4}" fill="none" stroke="currentColor" stroke-width="2.2"/>`;
+    if (t === 'E') return one(m-8) + `<path d="M${x+7} ${m-4}L${x-1} ${m+14}" stroke="currentColor" stroke-width="2.2"/>`;
+    return one(m-10) + one(m) + `<path d="M${x+7} ${m-14}L${x-3} ${m+16}" stroke="currentColor" stroke-width="2.2"/>`;
+  }
+  function ledgers(d, x){
+    const r = d - CLEFS[clef].bottom; let s = '';
+    for (let q = -2; q >= r; q -= 2) s += `<path d="M${x-17} ${YB - q*S/2}H${x+17}" stroke="currentColor" stroke-width="2"/>`;
+    for (let q = 10; q <= r; q += 2) s += `<path d="M${x-17} ${YB - q*S/2}H${x+17}" stroke="currentColor" stroke-width="2"/>`;
+    return s;
+  }
+  function headSVG(n, x){
+    const y = yOf(n.p), v = DBY[n.t].v, hollow = v >= 2, dotted = n.t.endsWith('.');
+    let s = ledgers(n.p, x) + `<ellipse cx="${x}" cy="${y}" rx="${hollow?9.2:10}" ry="${hollow?6.4:7.2}" transform="rotate(-20 ${x} ${y})" fill="${hollow?'#fffdf6':'currentColor'}" stroke="currentColor" stroke-width="${hollow?3:0}"/>`;
+    if (dotted){ const r = n.p - CLEFS[clef].bottom; s += `<circle cx="${x+16}" cy="${r % 2 === 0 ? y - S/4 : y}" r="2.8" fill="currentColor"/>`; }
+    return s;
+  }
+  // 依照拍子把八分、十六分音符分組（同一拍裡連在一起）
+  function beamGroups(b, pos){
+    const unit = den === 8 ? 1.5 : 1, groups = []; let g = [];
+    bars[b].forEach((n, i) => {
+      const v = DBY[n.t].v, ok = !DBY[n.t].rest && v < 1 && Math.floor(pos[i]/unit + 1e-6) === Math.floor((pos[i]+v)/unit - 1e-6);
+      const same = g.length && Math.floor(pos[g[0]]/unit + 1e-6) === Math.floor(pos[i]/unit + 1e-6) && g[g.length-1] === i-1;
+      if (ok && (same || !g.length)) g.push(i); else { if (g.length > 1) groups.push(g); g = ok ? [i] : []; }
     });
-    svg.innerHTML = s;
+    if (g.length > 1) groups.push(g);
+    return groups;
+  }
+  function render(){
+    const pr = perRow(), hw = headerW(), bw = (VW - hw - 8) / pr, nRows = Math.ceil(bars.length / pr);
+    const showAll = mode === 'write';
+    let out = '';
+    for (let row = 0; row < nRows; row++){
+      let s = '';
+      for (let k = 0; k < 5; k++) s += `<path class="sl" d="M8 ${Y0+k*S}H${hw + bw*Math.min(pr, bars.length - row*pr)}"/>`;
+      s += clefSVG() + keySigSVG() + (row === 0 ? timeSVG() : '');
+      for (let c = 0; c < pr; c++){
+        const b = row*pr + c; if (b >= bars.length) break;
+        const bx = hw + c*bw, list = bars[b].slice();
+        let pvI = -1;
+        if (preview && preview.b === b){ if (preview.i === -1){ list.push(preview.n); pvI = list.length-1; } else { list[preview.i] = Object.assign({}, list[preview.i], {p:preview.n.p}); pvI = preview.i; } }
+        s += `<rect class="barbg${b === active && showAll ? ' act' : ''}${b === playBar ? ' play' : ''}" data-bar="${b}" x="${bx}" y="${Y0-26}" width="${bw}" height="${4*S+52}" rx="10"/>`;
+        s += `<text class="bnum" x="${bx+6}" y="${Y0-10}">${b+1}</text>`;
+        const pos = []; let acc = 0; list.forEach(n => { pos.push(acc); acc += DBY[n.t].v; });
+        const X = p => bx + 26 + (p / barLen()) * (bw - 44);
+        if (showAll && acc < barLen() - 1e-6) s += `<rect class="slot" x="${X(acc)-12}" y="${Y0-4}" width="${bx + bw - 10 - X(acc) + 12}" height="${4*S+8}" rx="10"/>`;
+        // 分組（含預覽）
+        const save = bars[b]; bars[b] = list; const groups = beamGroups(b, pos); bars[b] = save;
+        const inGroup = new Map(); groups.forEach(g => g.forEach(i => inGroup.set(i, g)));
+        const cls = i => { const ref = b + ':' + i; return i === pvI ? 'pre' : nowRef === ref ? 'now' : mode === 'find' ? (done.has(ref) ? 'ok' : cur === ref ? 'cur' : '') : ''; };
+        list.forEach((n, i) => {
+          const x = X(pos[i]), D = DBY[n.t];
+          s += `<g class="n ${cls(i)}" data-b="${b}" data-i="${i}">`;
+          if (D.rest){ s += restSVG(n.t, x); }
+          else {
+            s += headSVG(n, x);
+            if (!inGroup.has(i) && D.v < 4){
+              const up = n.p - CLEFS[clef].bottom < 4, y = yOf(n.p), sx = up ? x + 9 : x - 9, ey = up ? y - 3.5*S : y + 3.5*S;
+              s += `<path d="M${sx} ${up ? y-2 : y+2}V${ey}" stroke="currentColor" stroke-width="2.6"/>`;
+              const flags = D.v === .25 ? 2 : D.v < 1 ? 1 : 0;
+              for (let f = 0; f < flags; f++){ const fy = ey + (up ? f*10 : -f*10);
+                s += up ? `<path d="M${sx} ${fy}q3 15 14 21q5 7 0 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>`
+                        : `<path d="M${sx} ${fy}q3 -15 14 -21q5 -7 0 -16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>`; }
+            }
+          }
+          s += `<rect x="${x-16}" y="10" width="32" height="${VH-20}" fill="transparent"/></g>`;
+        });
+        // 連桿
+        groups.forEach(g => {
+          const ns = g.map(i => list[i]), avg = ns.reduce((a, n) => a + n.p - CLEFS[clef].bottom, 0) / ns.length, up = avg < 4;
+          const ys = ns.map(n => yOf(n.p)), by = up ? Math.min(...ys) - 3.5*S + 4 : Math.max(...ys) + 3.5*S - 4;
+          const xs = g.map(i => X(pos[i]) + (up ? 9 : -9)), c = cls(g[0]) || cls(g[g.length-1]);
+          let bs = `<g class="n ${g.some(i => cls(i) === 'now') ? 'now' : g.some(i => cls(i) === 'pre') ? 'pre' : ''}" style="pointer-events:none">`;
+          g.forEach((i, k) => bs += `<path d="M${xs[k]} ${ys[k] + (up ? -2 : 2)}V${by}" stroke="currentColor" stroke-width="2.6"/>`);
+          bs += `<path d="M${xs[0]-1.3} ${by}H${xs[xs.length-1]+1.3}" stroke="currentColor" stroke-width="7"/>`;
+          const sy = by + (up ? 11 : -11);
+          g.forEach((i, k) => { if (DBY[list[i].t].v !== .25) return;
+            const nx = g[k+1] !== undefined && DBY[list[g[k+1]].t].v === .25, pv = g[k-1] !== undefined && DBY[list[g[k-1]].t].v === .25;
+            if (nx) bs += `<path d="M${xs[k]-1.3} ${sy}H${xs[k+1]+1.3}" stroke="currentColor" stroke-width="6"/>`;
+            else if (!pv) bs += `<path d="M${xs[k]} ${sy}H${xs[k] + (k ? -11 : 11)}" stroke="currentColor" stroke-width="6"/>`; });
+          s += bs + '</g>';
+        });
+        const last = b === bars.length - 1;
+        s += last ? `<path d="M${bx+bw-9} ${Y0}V${YB}" stroke="#232a66" stroke-width="1.8"/><path d="M${bx+bw-3} ${Y0}V${YB}" stroke="#232a66" stroke-width="5"/>`
+                  : `<path class="sl" d="M${bx+bw} ${Y0}V${YB}"/>`;
+      }
+      out += `<svg class="sys" data-row="${row}" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMinYMin meet">${s}</svg>`;
+    }
+    $('systems').innerHTML = out;
+    $('barCount').textContent = bars.length;
+    updateDurs();
   }
 
-  /* ---------- 拖曳：音符拉到五線譜就出聲並按下琴鍵 ---------- */
+  /* ================= 音符盤 ================= */
+  function durIcon(d){
+    const x = 20, y = 30;
+    if (d.rest){ return `<svg viewBox="0 0 40 44"><g transform="translate(0 ${-Y0-2*S+22})">${restSVG(d.id, x)}</g></svg>`; }
+    const v = d.v, hollow = v >= 2;
+    let s = `<ellipse cx="${x-3}" cy="${y}" rx="7.5" ry="5.4" transform="rotate(-20 ${x-3} ${y})" fill="${hollow?'none':'currentColor'}" stroke="currentColor" stroke-width="${hollow?2.4:0}"/>`;
+    if (v < 4) s += `<path d="M${x+4} ${y-2}V5" stroke="currentColor" stroke-width="2.2"/>`;
+    const flags = v === .25 ? 2 : v < 1 ? 1 : 0;
+    for (let f = 0; f < flags; f++) s += `<path d="M${x+4} ${5+f*8}q2 9 10 13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>`;
+    if (d.id.endsWith('.')) s += `<circle cx="${x+9}" cy="${y-1}" r="2.3" fill="currentColor"/>`;
+    return `<svg viewBox="0 0 40 44">${s}</svg>`;
+  }
+  $('durs').innerHTML = DURS.map((d, i) => (i === 8 ? '<span class="sep"></span>' : '') +
+    `<button class="dur${d.id === selDur ? ' on' : ''}" data-id="${d.id}" title="${d.name}（${d.v} 拍）" aria-label="${d.name}">${durIcon(d)}<small>${d.lab}</small></button>`).join('');
+  $('durs').addEventListener('click', e => { const b = e.target.closest('.dur'); if (!b || b.disabled) return;
+    selDur = b.dataset.id; updateDurs(); const D = DBY[selDur];
+    $('trayTxt').textContent = D.rest ? '休止符' : '拖我';
+    say(`選了${D.name}（${D.v} 拍）。` + (D.rest ? '點金色按鈕就會放進小節。' : '')); });
+  function updateDurs(){
+    document.querySelectorAll('.dur').forEach(b => { const D = DBY[b.dataset.id]; b.disabled = D.v > barLen() + 1e-6; b.classList.toggle('on', b.dataset.id === selDur); });
+    if (DBY[selDur].v > barLen() + 1e-6){ selDur = 'q'; updateDurs(); }
+  }
+
+  /* ================= 加音符／小節 ================= */
+  function targetBar(v){
+    if (left(active) >= v - 1e-6) return active;
+    for (let b = active + 1; b < bars.length; b++) if (left(b) >= v - 1e-6) return b;
+    if (used(active) > 0 && bars.length < 32){ bars.push([]); return bars.length - 1; }
+    return -1;
+  }
+  function addNote(n, b){
+    if (playing) stopPlay();
+    const v = DBY[n.t].v;
+    if (b === undefined) b = targetBar(v);
+    else if (left(b) < v - 1e-6){ say(`第 ${b+1} 小節只剩 ${left(b)} 拍，放不下${DBY[n.t].name}（${v} 拍）。`); render(); return false; }
+    if (b < 0){ say(`放不下${DBY[n.t].name}（${v} 拍），換短一點的音符試試。`); return false; }
+    bars[b].push(n); active = left(b) < 1e-6 && b + 1 < bars.length ? b + 1 : b;
+    render(); scrollToBar(b);
+    say(left(b) < 1e-6 ? `第 ${b+1} 小節寫滿了 ✦` : `第 ${b+1} 小節還剩 ${left(b)} 拍。`);
+    return true;
+  }
+  $('barPlus').onclick = () => { if (bars.length >= 32) return; stopPlay(); bars.push([]); active = bars.length - 1; render(); scrollToBar(active); say(`新增第 ${bars.length} 小節。`); };
+  $('barMinus').onclick = () => { if (bars.length <= 1) return; stopPlay(); bars.pop(); active = Math.min(active, bars.length - 1); render(); say(`剩下 ${bars.length} 小節。`); };
+  function scrollToBar(b){
+    const row = Math.floor(b / perRow()), el = document.querySelector(`.sys[data-row="${row}"]`), box = $('staffbox');
+    if (!el) return;
+    const top = el.offsetTop - 26, bot = el.offsetTop + el.offsetHeight;
+    if (top < box.scrollTop || bot > box.scrollTop + box.clientHeight) box.scrollTop = top;
+  }
+
+  /* ================= 拖曳 ================= */
   let drag = null;
-  function svgPt(e){ const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
-  function hitStaff(e){
-    const r = box.getBoundingClientRect();
-    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return null;
-    const q = svgPt(e); if (q.x < 150 || q.x > 985) return null;
-    return {p: Math.max(0, Math.min(11, Math.round((210 - q.y)/12) + 2))};
+  function hit(e){
+    const el = document.elementFromPoint(e.clientX, e.clientY), svg = el && el.closest && el.closest('.sys');
+    if (!svg) return null;
+    const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const q = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const pr = perRow(), hw = headerW(), bw = (VW - hw - 8) / pr;
+    if (q.x < hw - 10) return null;
+    const c = Math.max(0, Math.min(pr - 1, Math.floor((q.x - hw) / bw))), b = +svg.dataset.row * pr + c;
+    if (b >= bars.length) return null;
+    const C = CLEFS[clef], p = Math.max(C.lo, Math.min(C.hi, Math.round((YB - q.y) / (S/2)) + C.bottom));
+    return {b, p};
   }
   const GHOST = '<svg viewBox="0 0 40 40"><ellipse cx="16" cy="29" rx="9" ry="6.6" transform="rotate(-20 16 29)" fill="currentColor"/><path d="M24 27V5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
   function startDrag(e, from){
     if (playing) stopPlay();
-    if (mode === 'find'){ say('「找一找」要用下面的鋼琴鍵回答喔！想自己放音符請切到「寫一寫」。'); return; }
-    drag = {from, x:e.clientX, y:e.clientY, moved:false, lastP:-1, ghost:null, rest: from === null ? selRest : seq[from].p === null};
-    window.addEventListener('pointermove', moveDrag); window.addEventListener('pointerup', endDrag); window.addEventListener('pointercancel', endDrag);
+    if (mode === 'find'){ say('「找一找」要用下面的鋼琴鍵回答喔！想自己寫請切到「寫一寫」。'); return; }
+    const rest = from ? DBY[bars[from.b][from.i].t].rest : DBY[selDur].rest;
+    drag = {from, rest, x:e.clientX, y:e.clientY, moved:false, lastP:null, ghost:null};
+    addEventListener('pointermove', moveDrag); addEventListener('pointerup', endDrag); addEventListener('pointercancel', endDrag);
     e.preventDefault();
   }
   function moveDrag(e){
     if (!drag) return;
-    if (!drag.moved && Math.hypot(e.clientX-drag.x, e.clientY-drag.y) < 6) return;
-    if (!drag.moved){
-      drag.moved = true;
-      if (drag.from === null && !fits(seq.concat([{p:0, d: drag.rest ? 1 : selDur}]))) drag.full = true;
-      drag.ghost = document.createElement('div'); drag.ghost.className = 'ghost'; drag.ghost.innerHTML = GHOST; document.body.appendChild(drag.ghost);
-    }
-    const h = drag.full ? null : hitStaff(e);
-    drag.ghost.style.left = e.clientX+'px'; drag.ghost.style.top = e.clientY+'px'; drag.ghost.style.opacity = h ? 0 : 1;
-    box.classList.toggle('over', !!h);
-    if (drag.full) say('兩個小節放滿了（或這個音符太長放不下）。');
-    if (h && !drag.rest){ if (h.p !== drag.lastP){ press(h.p, true); drag.lastP = h.p; } }
-    else { if (drag.lastP !== -1) release(); drag.lastP = -1; }
-    preview = h ? {i: drag.from === null ? -1 : drag.from, n:{p: drag.rest ? null : h.p, d: drag.rest ? 1 : selDur}} : null;
-    if (!h && drag.from !== null) preview = null;
+    if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+    if (!drag.moved){ drag.moved = true; drag.ghost = document.createElement('div'); drag.ghost.className = 'ghost'; drag.ghost.innerHTML = GHOST; document.body.appendChild(drag.ghost); }
+    let h = hit(e);
+    if (h && drag.from && h.b !== drag.from.b) h = {b: drag.from.b, p: h.p};          // 已寫好的音符只改音高
+    if (h && !drag.from && left(h.b) < DBY[selDur].v - 1e-6){ say(`第 ${h.b+1} 小節只剩 ${left(h.b)} 拍，放不下這個音符。`); h = null; }
+    drag.ghost.style.left = e.clientX + 'px'; drag.ghost.style.top = e.clientY + 'px'; drag.ghost.style.opacity = h ? 0 : 1;
+    $('staffbox').classList.toggle('over', !!h);
+    if (h && !drag.rest){ if (h.p !== drag.lastP){ pressStep(h.p, true); drag.lastP = h.p; } } else { if (drag.lastP !== null) releaseKey(); drag.lastP = null; }
+    preview = h ? (drag.from ? {b:h.b, i:drag.from.i, n:{p:h.p}} : {b:h.b, i:-1, n:{p:h.p, t:selDur}}) : null;
+    if (h && drag.rest && drag.from) preview = null;
     render();
   }
   function endDrag(e){
     if (!drag) return;
-    window.removeEventListener('pointermove', moveDrag); window.removeEventListener('pointerup', endDrag); window.removeEventListener('pointercancel', endDrag);
-    const d = drag; drag = null; box.classList.remove('over'); if (d.ghost) d.ghost.remove();
+    removeEventListener('pointermove', moveDrag); removeEventListener('pointerup', endDrag); removeEventListener('pointercancel', endDrag);
+    const d = drag; drag = null; $('staffbox').classList.remove('over'); if (d.ghost) d.ghost.remove(); preview = null;
     if (!d.moved){
-      if (d.from !== null && seq[d.from].p !== null) press(seq[d.from].p);
-      else if (d.from === null && selRest) add({p:null, d:1});
-      return;
+      if (d.from){ const n = bars[d.from.b][d.from.i]; if (!DBY[n.t].rest) pressStep(n.p); }
+      else if (DBY[selDur].rest) addNote({p:null, t:selDur});
+      else say('把金色音符拖到五線譜上；或直接按下面的琴鍵。');
+      render(); return;
     }
-    const h = (e.type === 'pointerup' && !d.full) ? hitStaff(e) : null; preview = null;
-    if (h){
-      if (d.from === null){ seq.push({p: d.rest ? null : h.p, d: d.rest ? 1 : selDur}); }
-      else if (!d.rest) seq[d.from].p = h.p;
-      say(d.rest ? '放了一個休止符，這一拍不出聲。' : `放在${POS[h.p]}，是 ${SOL[h.p%7]}（${LET[h.p%7]}）`);
-    } else if (d.from !== null){ seq.splice(d.from, 1); say('拿掉了。'); }
-    downTimer = setTimeout(release, 300); render();
+    let h = e.type === 'pointerup' ? hit(e) : null;
+    if (d.from){
+      if (h){ if (!d.rest) bars[d.from.b][d.from.i].p = h.p; }
+      else { bars[d.from.b].splice(d.from.i, 1); say('拿掉了。'); }
+    } else if (h){
+      active = h.b; addNote({p: d.rest ? null : h.p, t: selDur}, h.b);
+    }
+    downTimer = setTimeout(releaseKey, 300); render();
   }
   $('tray').addEventListener('pointerdown', e => startDrag(e, null));
-  svg.addEventListener('pointerdown', e => {
-    const g = e.target.closest('.n'); if (!g || g.classList.contains('pre') || g.dataset.i === undefined) return;
-    const i = +g.dataset.i;
-    if (mode === 'find'){ if (done[i]) press(seq[i].p); return; }
-    startDrag(e, i);
+  $('systems').addEventListener('pointerdown', e => {
+    const g = e.target.closest('.n');
+    if (g && g.dataset.b !== undefined && !g.classList.contains('pre')){
+      const from = {b:+g.dataset.b, i:+g.dataset.i};
+      if (mode === 'find'){ const n = bars[from.b][from.i]; if (done.has(from.b + ':' + from.i) && n.p !== null) pressStep(n.p); return; }
+      return startDrag(e, from);
+    }
+    const bg = e.target.closest('.barbg');
+    if (bg && mode === 'write'){ active = +bg.dataset.bar; render(); say(`接下來寫在第 ${active+1} 小節。`); }
   });
 
-  /* ---------- 出題／找一找 ---------- */
-  function randomNotes(){
-    stopPlay(); seq = []; let p = 2 + Math.floor(Math.random()*6), first = true;
-    const step = () => { if (first){ first = false; return p; } let q; do { q = p + Math.floor(Math.random()*7) - 3; } while (q < 0 || q > 11 || q === p); return p = q; };
-    for (let bar = 0; bar < BEATS/BAR; bar++){
-      let left = BAR;
-      while (left > 0){
-        const r = Math.random();
-        if (!randMix){ seq.push({p:step(), d:1}); left -= 1; }
-        else if (r < .22 && left >= 2){ seq.push({p:step(), d:2}); left -= 2; }
-        else if (r < .5){ seq.push({p:step(), d:.5}, {p:step(), d:.5}); left -= 1; }
-        else if (r < .58 && seq.length && seq[seq.length-1].p !== null){ seq.push({p:null, d:1}); left -= 1; }
-        else { seq.push({p:step(), d:1}); left -= 1; }
+  /* ================= 出題 ================= */
+  function randomFill(){
+    stopPlay();
+    const C = CLEFS[clef]; let p = C.bottom + 1 + Math.floor(Math.random()*6), first = true;
+    const step = () => { if (first){ first = false; return p; } let q; do { q = p + Math.floor(Math.random()*7) - 3; } while (q < C.bottom - 2 || q > C.bottom + 10 || q === p); return p = q; };
+    const N = t => ({p: step(), t});
+    bars = bars.map((_, bi) => {
+      const out = []; let rem = barLen();
+      if (!randMix){ while (rem >= 1 - 1e-6){ out.push(N('q')); rem -= 1; } while (rem > 1e-6){ out.push(N('e')); rem -= .5; } return out; }
+      const unit = den === 8 ? 1.5 : 1;
+      while (rem > 1e-6){
+        const r = Math.random(), atStart = Math.abs(rem - barLen()) < 1e-6;
+        if (unit === 1){
+          if (atStart && rem === 4 && r < .06) { out.push(N('w')); rem -= 4; continue; }
+          if (rem >= 3 && r < .12) { out.push(N('h.')); rem -= 3; continue; }
+          if (rem >= 2 && r < .28) { out.push(N('h')); rem -= 2; continue; }
+          const k = Math.random();
+          if (k < .34) out.push(N('q'));
+          else if (k < .6) out.push(N('e'), N('e'));
+          else if (k < .72) out.push(N('s'), N('s'), N('s'), N('s'));
+          else if (k < .8) out.push(N('e'), N('s'), N('s'));
+          else if (k < .87) out.push(N('s'), N('s'), N('e'));
+          else if (k < .93) out.push(N('e.'), N('s'));
+          else out.push(out.length && out[out.length-1].p !== null ? {p:null, t:'Q'} : N('q'));
+          rem -= 1;
+        } else {
+          const k = Math.random();
+          if (k < .3) out.push(N('q.'));
+          else if (k < .55) out.push(N('q'), N('e'));
+          else if (k < .82) out.push(N('e'), N('e'), N('e'));
+          else if (k < .92) out.push(N('e'), N('q'));
+          else out.push(N('e.'), N('s'), N('e'));
+          rem -= 1.5;
+        }
       }
-    }
-    done = seq.map(() => false); cur = seq.findIndex(n => n.p !== null); nowI = -1; render();
-    say(mode === 'find' ? '看金色的音符，在鋼琴上找到它！' : '出好題了！按 ▶ 播放聽聽看，也可以拖動音符改音高。');
+      return out;
+    });
+    done = new Set(); nowRef = null; active = 0; cur = nextFind(null);
+    render(); $('staffbox').scrollTop = 0;
+    say(mode === 'find' ? '看金色的音符，在鋼琴上找到它！' : '出好題了！按「▶ 依序播放」聽聽看，也可以拖動音符改音高。');
   }
-  function answer(p, k){
-    if (cur < 0 || cur >= seq.length){ say('先按「🎲 隨機出題」。'); return; }
-    if (p === seq[cur].p){
-      press(p); done[cur] = true; cur++;
-      while (cur < seq.length && seq[cur].p === null) cur++;
-      say(cur >= seq.length ? '全部答對！太厲害了 ✦ 再按「🎲 隨機出題」挑戰下一題。' : '答對了！下一個音在哪裡？'); render();
+  function refs(){ const r = []; bars.forEach((bar, b) => bar.forEach((n, i) => { if (!DBY[n.t].rest) r.push(b + ':' + i); })); return r; }
+  function nextFind(after){ const r = refs(); if (after === null) return r[0] || null; const k = r.indexOf(after); return r[k+1] || null; }
+  function answer(m, k){
+    if (!cur){ say('先按「🎲 隨機出題」。'); return; }
+    const [b, i] = cur.split(':').map(Number), n = bars[b][i];
+    if (m === midiOf(n.p)){
+      pressStep(n.p); done.add(cur); cur = nextFind(cur);
+      say(cur ? '答對了！下一個音在哪裡？' : '全部答對！太厲害了 ✦ 再按「🎲 隨機出題」挑戰下一題。'); render();
+      if (cur) scrollToBar(+cur.split(':')[0]);
     } else {
-      tone(MIDI[p], .5); k.classList.add('bad'); setTimeout(() => k.classList.remove('bad'), 350);
-      say(seq[cur].p > p ? '再高一點，往右邊找找看。' : '再低一點，往左邊找找看。');
+      tone(m, .5); k.classList.add('bad'); setTimeout(() => k.classList.remove('bad'), 350);
+      say(midiOf(n.p) > m ? '再高一點，往右邊找找看。' : '再低一點，往左邊找找看。');
     }
   }
 
-  /* ---------- 播放（照音符長短） ---------- */
-  function stopPlay(){ playT.forEach(clearTimeout); playT = []; playing = false; nowI = -1; $('playBtn').textContent = '▶ 播放'; release(); render(); }
+  /* ================= 依序播放 ================= */
+  function stopPlay(){ playT.forEach(clearTimeout); playT = []; playing = false; nowRef = null; playBar = -1; $('playBtn').textContent = '▶ 依序播放'; releaseKey(); render(); }
   $('playBtn').onclick = () => {
     if (playing) return stopPlay();
-    if (!seq.length){ say('五線譜上還沒有音符。'); return; }
-    const {pos, end} = layout(seq);
-    playing = true; $('playBtn').textContent = '■ 停止';
-    seq.forEach((n, i) => playT.push(setTimeout(() => { nowI = i; if (n.p !== null) press(n.p); else release(); render(); }, pos[i]*BEAT_MS)));
-    playT.push(setTimeout(stopPlay, end*BEAT_MS + 300));
+    if (!bars.some(b => b.length)){ say('五線譜上還沒有音符。'); return; }
+    const spb = 60 / tempo * 1000; playing = true; $('playBtn').textContent = '■ 停止';
+    let t = 0;
+    bars.forEach((bar, b) => {
+      let pos = 0;
+      playT.push(setTimeout(() => { playBar = b; render(); scrollToBar(b); }, (b * barLen()) * spb));
+      bar.forEach((n, i) => {
+        const v = DBY[n.t].v, at = (b * barLen() + pos) * spb;
+        playT.push(setTimeout(() => { nowRef = b + ':' + i;
+          if (n.p !== null){ tone(midiOf(n.p), .9, v * spb / 1000 * .95); lightKey(midiOf(n.p)); showInfo(n.p); } else releaseKey();
+          render(); }, at));
+        pos += v;
+      });
+      t = (b + 1) * barLen() * spb;
+    });
+    playT.push(setTimeout(() => { stopPlay(); say('播完了！'); }, t + 300));
+    say(`依序播放 ${bars.length} 個小節，速度 ${tempo}。`);
   };
 
-  /* ---------- 控制 ---------- */
+  /* ================= 譜號／調號／移調／拍號 ================= */
   function seg(id, fn){ const el = $(id); el.querySelectorAll('button').forEach(b => b.onclick = () => { el.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); fn(b.dataset.v); }); }
-  seg('segDur', v => { selRest = v === 'r'; selDur = selRest ? 1 : +v;
-    $('trayTxt').textContent = selRest ? '休止符：拖到譜上（或點我）' : '拖我到五線譜';
-    say(selRest ? '選了四分休止符（停 1 拍）。' : `選了${DNAME[selDur]}（${selDur === .5 ? '半' : selDur} 拍）。`); });
-  seg('segMix', v => { randMix = v === 'mix'; });
+  seg('segClef', v => {
+    stopPlay(); const shift = v === 'bass' ? -14 : 14; if (v === clef) return;
+    clef = v; bars.forEach(bar => bar.forEach(n => { if (n.p !== null) n.p = Math.max(CLEFS[clef].lo, Math.min(CLEFS[clef].hi, n.p + shift)); }));
+    buildPiano(); render(); say(v === 'bass' ? '換成低音譜號，音符一起往下移兩個八度。' : '換成高音譜號，音符一起往上移兩個八度。');
+  });
+  $('keySel').innerHTML = KEYS.map((k, i) => `<option value="${i}">${k.name}</option>`).join('');
+  $('keySel').onchange = e => { stopPlay(); keyI = +e.target.value; buildPiano(); render(); say(`換成 ${KEYS[keyI].name}：譜上的音位置不變，音高照調號升降。`); };
+  function transpose(dir){
+    stopPlay();
+    const nk = keyI + dir, wrap = nk < 0 ? -1 : nk >= KEYS.length ? 1 : 0, k2 = mod(nk, KEYS.length);
+    const shift = KEYS[k2].tonic - KEYS[keyI].tonic + wrap * 7, C = CLEFS[clef];
+    if (bars.some(bar => bar.some(n => n.p !== null && (n.p + shift < C.lo || n.p + shift > C.hi)))){ say('再移就超出這個譜號的音域了。'); return; }
+    bars.forEach(bar => bar.forEach(n => { if (n.p !== null) n.p += shift; }));
+    keyI = k2; $('keySel').value = keyI; buildPiano(); render();
+    say(`移調到 ${KEYS[keyI].name}，整首旋律一起${dir > 0 ? '升高' : '降低'}。`);
+  }
+  $('tUp').onclick = () => transpose(1);
+  $('tDown').onclick = () => transpose(-1);
+  seg('segTime', v => {
+    stopPlay(); [num, den] = v.split('/').map(Number);
+    const all = bars.flat(), nb = []; let barN = [], rem = barLen();
+    all.forEach(n => { const d = DBY[n.t].v; if (d > barLen() + 1e-6) return; if (d > rem + 1e-6){ nb.push(barN); barN = []; rem = barLen(); } barN.push(n); rem -= d; });
+    if (barN.length) nb.push(barN);
+    while (nb.length < Math.max(2, bars.length) && nb.length < 32) nb.push([]);
+    bars = nb; active = 0; render(); say(`拍號改成 ${num}/${den}：每小節 ${num} 拍，以${den === 4 ? '四分' : '八分'}音符為一拍。`);
+  });
+  $('tempo').oninput = e => { tempo = +e.target.value; $('tempoTxt').textContent = tempo; if (playing) stopPlay(); };
+
+  /* ================= 其他控制 ================= */
   seg('segMode', v => { stopPlay(); mode = v; $('tray').style.opacity = v === 'find' ? .4 : 1;
-    $('tip').textContent = v === 'find' ? '看金色的音符，按下面對應的鋼琴鍵' : '先選音符長短，再把金色音符拖到五線譜上，鋼琴會馬上彈出那個音';
-    if (v === 'find') randomNotes(); else { done = seq.map(() => false); render(); say(''); } });
+    $('tip').textContent = v === 'find' ? '看金色的音符，按下面對應的鋼琴鍵（黑鍵也算）' : '選好音符長短，把金色音符拖到小節裡；點小節可以指定要寫在哪一小節';
+    if (v === 'find'){ if (!refs().length) randomFill(); done = new Set(); cur = nextFind(null); render(); say('看金色的音符，在鋼琴上找到它！'); } else { render(); say(''); } });
+  seg('segMix', v => { randMix = v === 'mix'; });
   seg('segCover', v => { coverOn = v === 'on'; $('info').classList.toggle('cover', coverOn); });
   $('info').addEventListener('click', () => $('info').classList.toggle('cover'));
   $('info').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $('info').click(); } });
-  $('randBtn').onclick = randomNotes;
-  $('undoBtn').onclick = () => { stopPlay(); seq.pop(); render(); };
-  $('clearBtn').onclick = () => { stopPlay(); seq = []; done = []; cur = 0; render(); say('清空了，可以開始寫自己的旋律。'); };
+  $('randBtn').onclick = randomFill;
+  $('undoBtn').onclick = () => { stopPlay(); for (let b = bars.length - 1; b >= 0; b--) if (bars[b].length){ bars[b].pop(); active = b; break; } render(); };
+  $('clearBtn').onclick = () => { stopPlay(); bars = bars.map(() => []); active = 0; done = new Set(); cur = null; render(); say('清空了，可以開始寫自己的旋律。'); };
+  document.addEventListener('keydown', e => { if (e.code === 'Space' && !/INPUT|SELECT|BUTTON/.test(e.target.tagName)){ e.preventDefault(); $('playBtn').click(); } });
+  let rw = 0; addEventListener('resize', () => { const w = perRow(); if (w !== rw){ rw = w; render(); } });
   function say(t){ $('msg').textContent = t; }
-  render();
+
+  buildPiano(); render(); rw = perRow();
+  say('預設兩個小節；按「＋」可以加更多小節，「▶ 依序播放」會從第 1 小節一路播到最後。');
 })();
 </script>
 </body>
