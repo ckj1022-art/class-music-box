@@ -317,6 +317,24 @@
     width:clamp(38px,5.2vh,64px); height:clamp(38px,5.2vh,64px); border-radius:50%; cursor:pointer; font-size:clamp(16px,2.4vh,30px); line-height:1;
     color:#fff; background:rgba(8,18,66,.66); border:1.5px dashed rgba(255,255,255,.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
   .chime-btn.off{opacity:.55}
+  .set-btn{left:calc(max(10px, env(safe-area-inset-left)) + clamp(38px,5.2vh,64px) + 8px)}
+  .set-wrap{position:fixed; inset:0; z-index:20; display:grid; place-items:center; background:rgba(6,12,46,.55); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px)}
+  .set-wrap[hidden]{display:none}
+  .set-card{position:relative; width:min(92vw, 30em); display:flex; flex-direction:column; gap:.9em; padding:1.4em 1.5em 1.3em;
+    font-size:clamp(14px,min(1.4vw,2.4vh),30px); color:#fff; border-radius:26px;
+    background:rgba(10,20,72,.94); border:1.5px dashed rgba(255,255,255,.5); box-shadow:0 18px 50px rgba(4,10,50,.6)}
+  .set-card h2{font-size:1.3em; font-weight:900; color:var(--gold); letter-spacing:.08em}
+  .set-x{position:absolute; top:.7em; right:.8em; width:2em; height:2em; border-radius:50%; border:none; cursor:pointer; font-size:1em; color:#fff; background:rgba(255,255,255,.14)}
+  .set-row{display:flex; align-items:center; justify-content:space-between; gap:1em; padding:.6em .9em; border-radius:16px; background:rgba(190,205,240,.12)}
+  .set-pill{font:inherit; font-weight:700; border:none; cursor:pointer; border-radius:999px; padding:.35em 1.1em; color:#17235f; background:linear-gradient(180deg,#fffaf0,#f6ecd0)}
+  .set-pill.off{background:rgba(255,255,255,.18); color:#fff}
+  .set-about{display:flex; flex-direction:column; align-items:center; gap:.2em; padding:.9em; border-radius:16px; background:rgba(190,205,240,.12); text-align:center}
+  .set-about b{font-size:1.25em; font-weight:900; color:#fff1c4}
+  .set-about span{color:rgba(232,238,255,.88)}
+  .set-fb{display:block; text-align:center; text-decoration:none; font-weight:900; padding:.7em 1em; border-radius:999px; color:#17235f;
+    background:linear-gradient(180deg,#fffaf0,#f6ecd0); box-shadow:0 2px 0 rgba(120,100,40,.25), 0 0 18px rgba(255,236,170,.45)}
+  .set-fb:hover,.set-fb:focus-visible{outline:none; box-shadow:0 2px 0 rgba(120,100,40,.25), 0 0 26px rgba(255,236,170,.75)}
+  .set-url{text-align:center; color:rgba(225,235,255,.7); margin-top:-.5em}
   .chime-btn:hover,.chime-btn:focus-visible{box-shadow:0 0 16px rgba(255,236,170,.5); outline:none}
   /* 四芒星閃爍（極少量，靠邊） */
   .star4{position:fixed; z-index:2; pointer-events:none; color:#fff3c4; animation:twinkle 3.6s ease-in-out infinite;
@@ -514,7 +532,6 @@
       </a>
     </nav>
 
-    <p class="foot">Design by Ray Chen／陳耿睿</p>
   </main>
 
   <!-- 音樂小精靈：自由飛行元件（固定定位，獨立於背景） -->
@@ -640,6 +657,26 @@
     </div>
 
   <button class="chime-btn" id="chimeBtn" aria-label="精靈風鈴聲 開／關" title="精靈風鈴聲">🔔</button>
+  <button class="chime-btn set-btn" id="setBtn" aria-label="設定與關於" title="設定" aria-haspopup="dialog" aria-expanded="false">⚙</button>
+
+  <!-- 設定：設計者資訊與回饋連結 -->
+  <div class="set-wrap" id="setWrap" hidden>
+    <section class="set-card" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+      <button class="set-x" id="setClose" aria-label="關閉">✕</button>
+      <h2 id="setTitle">⚙ 設定</h2>
+      <div class="set-row">
+        <span>精靈風鈴聲</span>
+        <button class="set-pill" id="setChime"></button>
+      </div>
+      <div class="set-about">
+        <b>班級音樂盒</b>
+        <span>Ray's Classroom Lab</span>
+        <span>Design by Ray Chen／陳耿睿</span>
+      </div>
+      <a class="set-fb" href="https://www.facebook.com/ray.chen.7370" target="_blank" rel="noopener">💬 意見回饋（Facebook）</a>
+      <small class="set-url">facebook.com/ray.chen.7370</small>
+    </section>
+  </div>
 
   <div class="toast" id="toast" role="status"></div>
 
@@ -803,7 +840,7 @@
 
     // 要避開的 UI 區塊（標題、卡片、頁尾）
     function zones(){
-      return ['.hero','.today','.cards','.foot','.chime-btn'].map(q => document.querySelector(q))
+      return ['.hero','.today','.cards','.chime-btn','.set-btn'].map(q => document.querySelector(q))
         .filter(Boolean).map(el => {
           const r = el.getBoundingClientRect();
           return {l:r.left-12, t:r.top-12, r:r.right+12, b:r.bottom+12};
@@ -1108,6 +1145,19 @@
       paint(); if (on){ timer = 0; wake(); } else { clearTimeout(timer); timer = 0; } });
     window.fairyChime = { sparkle(){ try { cluster(3, .06, true); } catch(e){} } };
     paint();
+  })();
+
+  /* ---------- 設定（設計者資訊與回饋連結） ---------- */
+  (function(){
+    const btn = document.getElementById('setBtn'), wrap = document.getElementById('setWrap'), chime = document.getElementById('chimeBtn'), pill = document.getElementById('setChime');
+    const syncPill = () => { const on = !chime.classList.contains('off'); pill.textContent = on ? '開' : '關'; pill.classList.toggle('off', !on); };
+    const open = () => { syncPill(); wrap.hidden = false; btn.setAttribute('aria-expanded', 'true'); document.getElementById('setClose').focus(); };
+    const close = () => { wrap.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.focus(); };
+    btn.addEventListener('click', open);
+    document.getElementById('setClose').addEventListener('click', close);
+    wrap.addEventListener('click', e => { if (e.target === wrap) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !wrap.hidden) close(); });
+    pill.addEventListener('click', () => { chime.click(); syncPill(); });
   })();
 
   /* ---------- 問候語 ＋ 今日聆聽計時環 ---------- */
