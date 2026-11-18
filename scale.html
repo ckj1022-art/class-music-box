@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>音階練習｜班級音樂盒</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#f4f1ff;--muted:rgba(225,235,255,.78);--gold:#ffd77a;--panel:rgba(8,18,66,.66);--line:rgba(255,255,255,.28);--cream1:#fffaf0;--cream2:#f6ecd0;--navy:#17235f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:#1b2f8f;min-height:100dvh;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(10,18,70,.55),rgba(10,18,70,.3) 35%,rgba(10,18,70,.55)),url("bg.jpg") 50% 55%/cover no-repeat}
+  .wrap{position:relative;z-index:1;width:100%;min-height:100dvh;padding:10px 16px 12px;display:flex;flex-direction:column;gap:10px}
+  header{display:flex;align-items:center;gap:12px}
+  header h1{flex:1;font-size:clamp(24px,min(4vw,5.4vh),60px);font-weight:900;letter-spacing:.08em;line-height:1.1;
+    background:linear-gradient(180deg,#fff 10%,#fff1c4 55%,#e9b44c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(30,40,120,.55)) drop-shadow(0 0 16px rgba(255,220,140,.3))}
+  header h1 small{display:block;font-size:.34em;font-weight:500;letter-spacing:.3em;-webkit-text-fill-color:var(--gold)}
+  .btn{font:inherit;font-weight:700;font-size:clamp(14px,min(1.3vw,2.2vh),30px);color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;
+    padding:.5em 1em;border-radius:999px;background:var(--panel);border:1.5px dashed rgba(255,255,255,.5);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .btn:hover,.btn:focus-visible{box-shadow:0 0 16px rgba(255,236,170,.45);outline:none}
+  .btn.primary{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy);border:none;box-shadow:0 2px 0 rgba(120,100,40,.25),0 0 18px rgba(255,236,170,.45)}
+  .btn:active{transform:scale(.96)}
+  .panel{background:var(--panel);border-radius:26px;border:1.5px solid rgba(255,255,255,.16);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(4,10,50,.3)}
+
+  /* 五線譜＋這個音 */
+  .top{flex:1;min-height:0;display:grid;grid-template-columns:1fr clamp(150px,17vw,330px);gap:10px}
+  .staffbox{position:relative;min-height:190px;background:linear-gradient(180deg,#fffdf6,#fbf3dc);border-radius:26px;border:3px solid rgba(255,255,255,.85);
+    box-shadow:0 8px 30px rgba(4,10,50,.35);overflow:hidden;touch-action:none}
+  .staffbox svg{position:absolute;inset:0;width:100%;height:100%}
+  .staffbox.over{box-shadow:0 0 0 4px var(--gold),0 8px 30px rgba(4,10,50,.35)}
+  .sl{stroke:#232a66;stroke-width:2.2}
+  .n{color:#232a66;cursor:grab}
+  .n.now{color:#e08a00}
+  .n.ok{color:#1c9b6a}
+  .n.cur{color:#e08a00;filter:drop-shadow(0 0 6px rgba(255,180,40,.9))}
+  .n.pre{opacity:.55;color:#e08a00}
+  .slot{fill:rgba(35,42,102,.07)}
+  .lab1{font-size:22px;font-weight:900;fill:#232a66;text-anchor:middle;font-family:inherit}
+  .lab2{font-size:15px;fill:#6a6f9c;text-anchor:middle;font-family:inherit}
+  .hide-lab .lab1,.hide-lab .lab2{display:none}
+  .tip{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:clamp(12px,1.6vh,22px);color:#7b7fa8;pointer-events:none}
+
+  .info{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45em;padding:.9em .8em;text-align:center;cursor:pointer;
+    background:linear-gradient(180deg,#fff8d6,#ffe9a2);color:#5a4500;border-radius:24px;border:3px solid rgba(255,255,255,.8);box-shadow:0 8px 30px rgba(4,10,50,.35);
+    font-size:clamp(13px,min(1.3vw,2.3vh),32px)}
+  .info .cap{font-size:.8em;font-weight:700;letter-spacing:.2em;color:#fff;background:#e0a020;border-radius:999px;padding:.2em 1em}
+  .info .big{font-size:3.6em;font-weight:900;line-height:1.05;color:#e08a00}
+  .info .mini{width:62%;max-width:9em;height:auto;background:#fffdf6;border-radius:.6em;box-shadow:inset 0 0 0 2px rgba(90,69,0,.12)}
+  .tiles{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:.4em}
+  .tile{display:flex;flex-direction:column;align-items:center;gap:.1em;padding:.35em .3em;border-radius:.7em;background:rgba(255,255,255,.62)}
+  .tile.wide{grid-column:1/-1}
+  .tile span{font-size:.72em;font-weight:500;opacity:.7;letter-spacing:.1em}
+  .tile b{font-size:1.25em;font-weight:900;line-height:1.2}
+  .info .q{display:none;flex-direction:column;align-items:center;gap:.3em;font-weight:700}
+  .info .q b{font-size:4.6em;line-height:1;color:#e08a00}
+  .info .q small{font-size:.8em;font-weight:500;opacity:.7}
+  .info.cover>*{display:none}
+  .info.cover .q{display:flex}
+  /* 控制列 */
+  .ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px}
+  .seg{display:inline-flex;border-radius:999px;overflow:hidden;background:rgba(8,18,66,.5);border:1.5px dashed rgba(255,255,255,.45)}
+  .seg button{font:inherit;font-weight:700;font-size:clamp(13.5px,min(1.25vw,2.1vh),28px);padding:.5em .9em;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:999px;white-space:nowrap}
+  .seg button.on{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy)}
+  .lab{font-size:clamp(13px,min(1.2vw,2vh),26px);font-weight:700;color:var(--muted)}
+  .tray{display:inline-flex;align-items:center;gap:.4em;padding:.3em .9em .3em .5em;border-radius:999px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
+    font-weight:700;font-size:clamp(14px,min(1.3vw,2.2vh),30px);color:var(--navy);background:linear-gradient(180deg,#fff1c4,#ffd77a);box-shadow:0 2px 0 rgba(120,100,40,.3),0 0 18px rgba(255,236,170,.5)}
+  .tray svg{width:1.7em;height:1.7em}
+  .ghost{position:fixed;z-index:60;pointer-events:none;width:46px;height:46px;transform:translate(-50%,-50%);color:#e08a00;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+  .msg{margin-left:auto;font-size:clamp(13px,min(1.25vw,2.1vh),28px);font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(4,10,50,.8);text-align:right}
+
+  /* 鋼琴 */
+  .piano{position:relative;height:clamp(120px,27vh,420px);padding:8px;border-radius:22px;background:#10194f;border:1.5px solid rgba(255,255,255,.2);box-shadow:0 8px 30px rgba(4,10,50,.4);touch-action:none;user-select:none;-webkit-user-select:none}
+  .keys{position:relative;width:100%;height:100%;display:flex;gap:3px}
+  .wk{flex:1;position:relative;border-radius:0 0 10px 10px;background:linear-gradient(180deg,#fff,#eef0f8);cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:6%;
+    box-shadow:inset 0 -6px 0 rgba(0,0,0,.12);transition:transform .06s,background .06s}
+  .wk small{font-size:clamp(11px,1.7vh,22px);font-weight:700;color:var(--kc)}
+  .wk b{font-size:clamp(15px,2.8vh,38px);font-weight:900;color:#232a66;line-height:1.1}
+  .wk em{position:absolute;top:44%;left:6%;font-style:normal;font-size:clamp(9px,1.3vh,16px);font-weight:700;color:#fff;background:#f08a5d;border-radius:6px;padding:1px 5px}
+  .wk.down{background:linear-gradient(180deg,#ffe9a8,#ffd15c);transform:translateY(4px);box-shadow:inset 0 -2px 0 rgba(0,0,0,.15),0 0 18px rgba(255,220,140,.8)}
+  .wk.bad{background:linear-gradient(180deg,#ffd0d6,#ff9aa8)}
+  .bk{position:absolute;top:0;width:5%;height:58%;margin-left:-2.5%;border-radius:0 0 7px 7px;background:linear-gradient(180deg,#2a2f4a,#0b0d1c);cursor:pointer;z-index:2;box-shadow:inset 0 -5px 0 rgba(255,255,255,.12),0 3px 6px rgba(0,0,0,.4)}
+  .bk.down{background:linear-gradient(180deg,#6a5a20,#3a3010);transform:translateY(3px)}
+
+  @media (max-width:700px){
+    .top{grid-template-columns:1fr}
+    .info{flex-direction:row;flex-wrap:wrap;padding:.5em .7em;gap:.6em}
+    .info .cap{display:none}
+    .info .big{font-size:2.4em}
+    .info .mini{width:4.6em}
+    .tiles{flex:1;width:auto;grid-template-columns:1fr 1fr 1.4fr}
+    .tile.wide{grid-column:auto}
+    .info.cover .q{flex-direction:row;width:100%;justify-content:center} .info .q b{font-size:2em}
+    .staffbox{min-height:210px}
+    .msg{margin-left:0;flex-basis:100%;text-align:left}
+    .bk{width:6%;margin-left:-3%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <header>
+    <h1>音階練習<small>SCALE · 五線譜和鋼琴鍵</small></h1>
+    <a class="btn" href="index.html">← 回音樂盒</a>
+  </header>
+
+  <div class="top">
+    <div class="staffbox" id="staffbox">
+      <svg id="staff" viewBox="0 30 1000 250" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="tip" id="tip">先選音符長短，再把金色音符拖到五線譜上，鋼琴會馬上彈出那個音</div>
+    </div>
+    <aside class="info cover" id="info" role="button" tabindex="0" aria-live="polite" aria-label="這個音的答案，點一下顯示或蓋住">
+      <span class="q"><b>？</b>這是什麼音？<small>點一下看答案</small></span>
+      <span class="cap">這個音</span>
+      <span class="big" id="iSol">–</span>
+      <svg class="mini" id="iMini" viewBox="0 0 120 84" aria-hidden="true"></svg>
+      <div class="tiles">
+        <div class="tile"><span>音名</span><b id="iLet">–</b></div>
+        <div class="tile"><span>簡譜</span><b id="iNum">–</b></div>
+        <div class="tile wide"><span>位置</span><b id="iPos">–</b></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="panel ctrl">
+    <div class="tray" id="tray" role="button" aria-label="拖曳音符到五線譜"><svg viewBox="0 0 40 40"><ellipse cx="16" cy="29" rx="9" ry="6.6" transform="rotate(-20 16 29)" fill="currentColor"/><path d="M24 27V5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><span id="trayTxt">拖我到五線譜</span></div>
+    <div class="seg" id="segDur" aria-label="音符長短"><button data-v="2">二分 2拍</button><button data-v="1" class="on">四分 1拍</button><button data-v="0.5">八分 半拍</button><button data-v="r">休止符</button></div>
+        <div class="seg" id="segMode"><button data-v="write" class="on">寫一寫</button><button data-v="find">找一找</button></div>
+    <button class="btn primary" id="randBtn">🎲 隨機出題</button>
+    <div class="seg" id="segMix" aria-label="出題節奏"><button data-v="q" class="on">只出四分</button><button data-v="mix">混合節奏</button></div>
+    <button class="btn" id="undoBtn">↩ 退一個</button>
+    <button class="btn" id="clearBtn">清空</button>
+    <div class="seg" id="segCover" aria-label="這個音的答案"><button data-v="on" class="on">答案先蓋住</button><button data-v="off">直接顯示</button></div>
+    <button class="btn primary" id="playBtn">▶ 播放</button>
+    <span class="msg" id="msg"></span>
+  </div>
+
+  <div class="piano"><div class="keys" id="keys"></div></div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  /* p = 五線譜位置：0 = 中央 C（下加一線）… 11 = 高音 sol（上加一間）；p = null 是休止符 */
+  const MIDI = [60,62,64,65,67,69,71,72,74,76,77,79];
+  const SOL = ['do','re','mi','fa','sol','la','si'], LET = ['C','D','E','F','G','A','B'];
+  const KC = ['#e4572e','#f08a1c','#d9a400','#3fa34d','#1c9bb5','#3f6fe0','#9b5de5'];
+  const POS = ['下加一線','下加一間','第一線','第一間','第二線','第二間','第三線','第三間','第四線','第四間','第五線','上加一間'];
+  const DNAME = {2:'二分音符', 1:'四分音符', .5:'八分音符'};
+  const num = p => (p%7+1) + (p >= 7 ? '̇' : '');
+  const BEATS = 8, BAR = 4, BW = 98, X = b => 215 + b*BW, PY = p => 210 - (p-2)*12, BEAT_MS = 640;
+  let seq = [], done = [], mode = 'write', cur = 0, preview = null, nowI = -1, playing = false, playT = [];
+  let selDur = 1, selRest = false, randMix = false, coverOn = true;
+  const svg = $('staff'), box = $('staffbox');
+
+  /* 排版：一個音符如果塞不進這一小節剩下的拍子，就從下一小節開始 */
+  function layout(list){
+    let b = 0; const pos = [];
+    for (const n of list){ const left = BAR - (b % BAR); if (n.d > left) b += left; pos.push(b); b += n.d; }
+    return {pos, end:b};
+  }
+  const fits = (list) => layout(list).end <= BEATS + 1e-9;
+
+  /* ---------- 聲音：鋼琴 ---------- */
+  let ctx = null;
+  function tone(midi, vel){
+    try {
+      if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+      const t = ctx.currentTime + .005, f = 440*Math.pow(2,(midi-69)/12), out = ctx.createGain(); out.gain.value = vel || .9; out.connect(ctx.destination);
+      for (let n = 1; n <= 7; n++){
+        const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = f*n*(1+.0004*n*n);
+        const a = .32*Math.pow(n,-1.2)*Math.exp(-(n-1)*.35);
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(a,t+.005); g.gain.setTargetAtTime(0,t+.005,1.1/(1+n*.5));
+        o.connect(g).connect(out); o.start(t); o.stop(t+2.2);
+      }
+    } catch(e){}
+  }
+
+  /* ---------- 鋼琴鍵 ---------- */
+  const keys = $('keys'); let downKey = null, downTimer = 0;
+  keys.innerHTML = MIDI.map((m,p) => `<div class="wk" data-p="${p}" style="--kc:${KC[p%7]}">${p===0?'<em>中央C</em>':''}<small>${SOL[p%7]}</small><b>${LET[p%7]}</b></div>`).join('')
+    + [[0,61],[1,63],[3,66],[4,68],[5,70],[7,73],[8,75],[10,78]].map(([i,m]) => `<div class="bk" data-m="${m}" style="left:${(i+1)/12*100}%"></div>`).join('');
+  function press(p, hold){
+    tone(MIDI[p]);
+    if (downKey) downKey.classList.remove('down'); clearTimeout(downTimer);
+    downKey = keys.querySelector(`.wk[data-p="${p}"]`); downKey.classList.add('down');
+    if (!hold) downTimer = setTimeout(release, 380);
+    showInfo(p);
+  }
+  function release(){ if (downKey) downKey.classList.remove('down'); downKey = null; }
+  keys.addEventListener('pointerdown', e => {
+    const b = e.target.closest('.bk');
+    if (b){ tone(+b.dataset.m); b.classList.add('down'); setTimeout(() => b.classList.remove('down'), 250); return; }
+    const k = e.target.closest('.wk'); if (!k) return;
+    const p = +k.dataset.p;
+    if (mode === 'find') return answer(p, k);
+    press(p); add({p, d:selDur});
+  });
+  function add(n){
+    if (!fits(seq.concat([n]))){ say('兩個小節放滿了（或這個音符太長放不下），可以按「退一個」或「清空」。'); return false; }
+    seq.push(n); render(); say(''); return true;
+  }
+  function showInfo(p, d){
+    $('iSol').textContent = SOL[p%7]; $('iSol').style.color = KC[p%7];
+    if (coverOn) $('info').classList.add('cover');
+    $('iLet').textContent = LET[p%7] + (p >= 7 ? '（高音）' : ''); $('iNum').textContent = num(p); $('iPos').textContent = POS[p];
+    { const y = 62 - (p-2)*5; let m = ''; for (let k = 0; k < 5; k++) m += `<path d="M10 ${62-k*10}H110" stroke="#232a66" stroke-width="1.4"/>`;
+      if (p === 0) m += `<path d="M48 ${y}H72" stroke="#232a66" stroke-width="1.4"/>`;
+      m += `<ellipse cx="60" cy="${y}" rx="7" ry="5" transform="rotate(-20 60 ${y})" fill="${KC[p%7]}"/>`; $('iMini').innerHTML = m; }
+  }
+
+  /* ---------- 五線譜繪製 ---------- */
+  function stemUp(i, list){                 // 連在一起的兩個八分音符用同一個方向
+    const m = beamMate(i, list);
+    return m === null ? list[i].p < 6 : (list[i].p + list[m].p)/2 < 6;
+  }
+  function beamMate(i, list, pos){
+    pos = pos || layout(list).pos; const n = list[i];
+    if (!n || n.d !== .5 || n.p === null) return null;
+    const onBeat = Math.abs(pos[i] % 1) < 1e-9, j = onBeat ? i+1 : i-1, o = list[j];
+    if (!o || o.d !== .5 || o.p === null) return null;
+    return Math.abs(pos[j] - pos[i]) === .5 && Math.floor(pos[i]) === Math.floor(pos[j]) ? j : null;
+  }
+  function noteSVG(n, x, cls, i, up, flag){
+    if (n.p === null){
+      return `<g class="n ${cls}" data-i="${i}"><path d="M${x-7} 126 l13 17 l-12 13 l13 16 q-16 -6 -13 11" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="${x-24}" y="60" width="48" height="200" fill="transparent"/></g>`;
+    }
+    const y = PY(n.p), hollow = n.d === 2;
+    let s = `<g class="n ${cls}" data-i="${i}">`;
+    if (n.p === 0) s += `<path d="M${x-26} ${y}H${x+26}" stroke="currentColor" stroke-width="2.4"/>`;
+    s += `<ellipse cx="${x}" cy="${y}" rx="${hollow?13.5:15}" ry="${hollow?9.2:10.6}" transform="rotate(-20 ${x} ${y})" fill="${hollow?'#fffdf6':'currentColor'}" stroke="currentColor" stroke-width="${hollow?4:0}"/>`;
+    const sx = up ? x+13.5 : x-13.5, sy0 = up ? y-3 : y+3, sy1 = up ? y-72 : y+72;
+    s += `<path d="M${sx} ${sy0}V${sy1}" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`;
+    if (flag) s += up ? `<path d="M${sx} ${sy1} q3 18 16 26 q6 8 0 20" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>`
+                      : `<path d="M${sx} ${sy1} q3 -18 16 -26 q6 -8 0 -20" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>`;
+    const hw = Math.min(40, n.d*BW/2 - 1);
+    s += `<rect x="${x-hw}" y="60" width="${hw*2}" height="200" fill="transparent"/></g>`;
+    return s;
+  }
+  function render(){
+    const list = seq.slice(); let pvI = -1;
+    if (preview){ if (preview.i === -1){ list.push(preview.n); pvI = list.length-1; } else { list[preview.i] = Object.assign({}, list[preview.i], {p:preview.n.p}); pvI = preview.i; } }
+    const {pos, end} = layout(list);
+    let s = '';
+    for (let k = 0; k < 5; k++) s += `<path class="sl" d="M40 ${210-k*24}H975"/>`;
+    s += `<g transform="translate(62 84) scale(1.62)" fill="none" stroke="#232a66" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 100 C8 104 4 90 14 88 C20 87 22 96 15 97"/><path d="M20 100 C28 98 27 88 25 78 L17 22 C15 8 24 0 27 10 C30 22 20 32 12 42 C2 54 4 72 20 74 C34 75 38 58 26 54 C16 51 10 62 17 68"/></g>`;
+    const barX = X(BAR) - BW/2 + 4;
+    s += `<path class="sl" d="M${barX} 114V210"/><path class="sl" d="M962 114V210"/><path d="M972 114V210" stroke="#232a66" stroke-width="6"/>`;
+    if (mode === 'write' && end < BEATS) s += `<rect class="slot" x="${X(end)-30}" y="96" width="${(BEATS-end)*BW - 30}" height="150" rx="14"/>`;
+    list.forEach((n, i) => {
+      const x = X(pos[i]) + (n.d === .5 ? -8 : 0);
+      const cls = i === pvI ? 'pre' : i === nowI ? 'now' : mode === 'find' ? (done[i] ? 'ok' : i === cur ? 'cur' : '') : '';
+      const mate = beamMate(i, list, pos), up = n.p === null ? true : stemUp(i, list);
+      s += noteSVG(n, x, cls, i, up, n.d === .5 && mate === null);
+      if (mate !== null && mate > i){
+        const m = list[mate], x2 = X(pos[mate]) - 8, y1 = PY(n.p) + (up ? -72 : 72), y2 = PY(m.p) + (up ? -72 : 72), o = up ? 13.5 : -13.5;
+        s += `<path class="n ${cls}" d="M${x+o} ${y1}L${x2+o} ${y2}" stroke="currentColor" stroke-width="9" style="pointer-events:none"/>`;
+      }
+    });
+    svg.innerHTML = s;
+  }
+
+  /* ---------- 拖曳：音符拉到五線譜就出聲並按下琴鍵 ---------- */
+  let drag = null;
+  function svgPt(e){ const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+  function hitStaff(e){
+    const r = box.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return null;
+    const q = svgPt(e); if (q.x < 150 || q.x > 985) return null;
+    return {p: Math.max(0, Math.min(11, Math.round((210 - q.y)/12) + 2))};
+  }
+  const GHOST = '<svg viewBox="0 0 40 40"><ellipse cx="16" cy="29" rx="9" ry="6.6" transform="rotate(-20 16 29)" fill="currentColor"/><path d="M24 27V5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
+  function startDrag(e, from){
+    if (playing) stopPlay();
+    if (mode === 'find'){ say('「找一找」要用下面的鋼琴鍵回答喔！想自己放音符請切到「寫一寫」。'); return; }
+    drag = {from, x:e.clientX, y:e.clientY, moved:false, lastP:-1, ghost:null, rest: from === null ? selRest : seq[from].p === null};
+    window.addEventListener('pointermove', moveDrag); window.addEventListener('pointerup', endDrag); window.addEventListener('pointercancel', endDrag);
+    e.preventDefault();
+  }
+  function moveDrag(e){
+    if (!drag) return;
+    if (!drag.moved && Math.hypot(e.clientX-drag.x, e.clientY-drag.y) < 6) return;
+    if (!drag.moved){
+      drag.moved = true;
+      if (drag.from === null && !fits(seq.concat([{p:0, d: drag.rest ? 1 : selDur}]))) drag.full = true;
+      drag.ghost = document.createElement('div'); drag.ghost.className = 'ghost'; drag.ghost.innerHTML = GHOST; document.body.appendChild(drag.ghost);
+    }
+    const h = drag.full ? null : hitStaff(e);
+    drag.ghost.style.left = e.clientX+'px'; drag.ghost.style.top = e.clientY+'px'; drag.ghost.style.opacity = h ? 0 : 1;
+    box.classList.toggle('over', !!h);
+    if (drag.full) say('兩個小節放滿了（或這個音符太長放不下）。');
+    if (h && !drag.rest){ if (h.p !== drag.lastP){ press(h.p, true); drag.lastP = h.p; } }
+    else { if (drag.lastP !== -1) release(); drag.lastP = -1; }
+    preview = h ? {i: drag.from === null ? -1 : drag.from, n:{p: drag.rest ? null : h.p, d: drag.rest ? 1 : selDur}} : null;
+    if (!h && drag.from !== null) preview = null;
+    render();
+  }
+  function endDrag(e){
+    if (!drag) return;
+    window.removeEventListener('pointermove', moveDrag); window.removeEventListener('pointerup', endDrag); window.removeEventListener('pointercancel', endDrag);
+    const d = drag; drag = null; box.classList.remove('over'); if (d.ghost) d.ghost.remove();
+    if (!d.moved){
+      if (d.from !== null && seq[d.from].p !== null) press(seq[d.from].p);
+      else if (d.from === null && selRest) add({p:null, d:1});
+      return;
+    }
+    const h = (e.type === 'pointerup' && !d.full) ? hitStaff(e) : null; preview = null;
+    if (h){
+      if (d.from === null){ seq.push({p: d.rest ? null : h.p, d: d.rest ? 1 : selDur}); }
+      else if (!d.rest) seq[d.from].p = h.p;
+      say(d.rest ? '放了一個休止符，這一拍不出聲。' : `放在${POS[h.p]}，是 ${SOL[h.p%7]}（${LET[h.p%7]}）`);
+    } else if (d.from !== null){ seq.splice(d.from, 1); say('拿掉了。'); }
+    downTimer = setTimeout(release, 300); render();
+  }
+  $('tray').addEventListener('pointerdown', e => startDrag(e, null));
+  svg.addEventListener('pointerdown', e => {
+    const g = e.target.closest('.n'); if (!g || g.classList.contains('pre') || g.dataset.i === undefined) return;
+    const i = +g.dataset.i;
+    if (mode === 'find'){ if (done[i]) press(seq[i].p); return; }
+    startDrag(e, i);
+  });
+
+  /* ---------- 出題／找一找 ---------- */
+  function randomNotes(){
+    stopPlay(); seq = []; let p = 2 + Math.floor(Math.random()*6), first = true;
+    const step = () => { if (first){ first = false; return p; } let q; do { q = p + Math.floor(Math.random()*7) - 3; } while (q < 0 || q > 11 || q === p); return p = q; };
+    for (let bar = 0; bar < BEATS/BAR; bar++){
+      let left = BAR;
+      while (left > 0){
+        const r = Math.random();
+        if (!randMix){ seq.push({p:step(), d:1}); left -= 1; }
+        else if (r < .22 && left >= 2){ seq.push({p:step(), d:2}); left -= 2; }
+        else if (r < .5){ seq.push({p:step(), d:.5}, {p:step(), d:.5}); left -= 1; }
+        else if (r < .58 && seq.length && seq[seq.length-1].p !== null){ seq.push({p:null, d:1}); left -= 1; }
+        else { seq.push({p:step(), d:1}); left -= 1; }
+      }
+    }
+    done = seq.map(() => false); cur = seq.findIndex(n => n.p !== null); nowI = -1; render();
+    say(mode === 'find' ? '看金色的音符，在鋼琴上找到它！' : '出好題了！按 ▶ 播放聽聽看，也可以拖動音符改音高。');
+  }
+  function answer(p, k){
+    if (cur < 0 || cur >= seq.length){ say('先按「🎲 隨機出題」。'); return; }
+    if (p === seq[cur].p){
+      press(p); done[cur] = true; cur++;
+      while (cur < seq.length && seq[cur].p === null) cur++;
+      say(cur >= seq.length ? '全部答對！太厲害了 ✦ 再按「🎲 隨機出題」挑戰下一題。' : '答對了！下一個音在哪裡？'); render();
+    } else {
+      tone(MIDI[p], .5); k.classList.add('bad'); setTimeout(() => k.classList.remove('bad'), 350);
+      say(seq[cur].p > p ? '再高一點，往右邊找找看。' : '再低一點，往左邊找找看。');
+    }
+  }
+
+  /* ---------- 播放（照音符長短） ---------- */
+  function stopPlay(){ playT.forEach(clearTimeout); playT = []; playing = false; nowI = -1; $('playBtn').textContent = '▶ 播放'; release(); render(); }
+  $('playBtn').onclick = () => {
+    if (playing) return stopPlay();
+    if (!seq.length){ say('五線譜上還沒有音符。'); return; }
+    const {pos, end} = layout(seq);
+    playing = true; $('playBtn').textContent = '■ 停止';
+    seq.forEach((n, i) => playT.push(setTimeout(() => { nowI = i; if (n.p !== null) press(n.p); else release(); render(); }, pos[i]*BEAT_MS)));
+    playT.push(setTimeout(stopPlay, end*BEAT_MS + 300));
+  };
+
+  /* ---------- 控制 ---------- */
+  function seg(id, fn){ const el = $(id); el.querySelectorAll('button').forEach(b => b.onclick = () => { el.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); fn(b.dataset.v); }); }
+  seg('segDur', v => { selRest = v === 'r'; selDur = selRest ? 1 : +v;
+    $('trayTxt').textContent = selRest ? '休止符：拖到譜上（或點我）' : '拖我到五線譜';
+    say(selRest ? '選了四分休止符（停 1 拍）。' : `選了${DNAME[selDur]}（${selDur === .5 ? '半' : selDur} 拍）。`); });
+  seg('segMix', v => { randMix = v === 'mix'; });
+  seg('segMode', v => { stopPlay(); mode = v; $('tray').style.opacity = v === 'find' ? .4 : 1;
+    $('tip').textContent = v === 'find' ? '看金色的音符，按下面對應的鋼琴鍵' : '先選音符長短，再把金色音符拖到五線譜上，鋼琴會馬上彈出那個音';
+    if (v === 'find') randomNotes(); else { done = seq.map(() => false); render(); say(''); } });
+  seg('segCover', v => { coverOn = v === 'on'; $('info').classList.toggle('cover', coverOn); });
+  $('info').addEventListener('click', () => $('info').classList.toggle('cover'));
+  $('info').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $('info').click(); } });
+  $('randBtn').onclick = randomNotes;
+  $('undoBtn').onclick = () => { stopPlay(); seq.pop(); render(); };
+  $('clearBtn').onclick = () => { stopPlay(); seq = []; done = []; cur = 0; render(); say('清空了，可以開始寫自己的旋律。'); };
+  function say(t){ $('msg').textContent = t; }
+  render();
+})();
+</script>
+</body>
+</html>

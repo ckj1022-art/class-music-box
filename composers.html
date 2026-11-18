@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>音樂家｜班級音樂盒</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#f4f1ff;--muted:rgba(225,235,255,.8);--gold:#ffd77a;--panel:rgba(8,18,66,.66);--line:rgba(255,255,255,.28);--cream1:#fffaf0;--cream2:#f6ecd0;--navy:#17235f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:#1b2f8f;min-height:100dvh}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(10,18,70,.55),rgba(10,18,70,.3) 35%,rgba(10,18,70,.55)),url("bg.jpg") 50% 55%/cover no-repeat}
+  .wrap{position:relative;z-index:1;width:100%;min-height:100dvh;padding:10px 16px 12px;display:flex;flex-direction:column;gap:10px}
+  header{display:flex;align-items:center;gap:12px}
+  header h1{flex:1;font-size:clamp(24px,min(4vw,5.4vh),60px);font-weight:900;letter-spacing:.08em;line-height:1.1;
+    background:linear-gradient(180deg,#fff 10%,#fff1c4 55%,#e9b44c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(30,40,120,.55)) drop-shadow(0 0 16px rgba(255,220,140,.3))}
+  header h1 small{display:block;font-size:.34em;font-weight:500;letter-spacing:.3em;-webkit-text-fill-color:var(--gold)}
+  .btn{font:inherit;font-weight:700;font-size:clamp(14px,min(1.3vw,2.2vh),30px);color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;
+    padding:.5em 1em;border-radius:999px;background:var(--panel);border:1.5px dashed rgba(255,255,255,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .btn:hover,.btn:focus-visible{box-shadow:0 0 16px rgba(255,236,170,.45);outline:none}
+  .panel{background:var(--panel);border-radius:26px;border:1.5px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(4,10,50,.3)}
+
+  .main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:12px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:clamp(6px,.8vw,12px);padding:clamp(8px,1vw,14px)}
+  .who{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2em;min-height:0;padding:.35em .2em .45em;border-radius:18px;cursor:pointer;font:inherit;color:#fff;
+    background:rgba(190,205,240,.12);border:1.5px solid var(--line);transition:transform .15s,background .15s,box-shadow .15s;font-size:clamp(12px,min(1.15vw,2vh),28px)}
+  .who svg{flex:1;min-height:0;width:auto;max-width:100%;height:clamp(60px,14vh,220px);border-radius:14px}
+  .who b{font-weight:900;letter-spacing:.06em}
+  .who small{font-size:.74em;color:var(--muted)}
+  .who:hover,.who:focus-visible{transform:translateY(-3px);background:rgba(190,205,240,.22);outline:none}
+  .who.on{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy);border-color:transparent;box-shadow:0 0 18px rgba(255,236,170,.5)}
+  .who.on small{color:#4a5590}
+
+  .detail{display:flex;flex-direction:column;gap:clamp(6px,1.1vh,16px);padding:clamp(12px,1.6vw,26px);font-size:clamp(13.5px,min(1.2vw,2.05vh),30px);overflow:auto}
+  .d-top{display:flex;align-items:center;gap:clamp(10px,1.4vw,24px)}
+  .d-top svg{flex:none;width:clamp(84px,min(10vw,17vh),230px);height:auto;border-radius:22px;border:3px solid rgba(255,255,255,.85);box-shadow:0 6px 20px rgba(4,10,50,.4)}
+  .d-name h2{font-size:2.1em;font-weight:900;line-height:1.1;letter-spacing:.06em;
+    background:linear-gradient(180deg,#fff 10%,#fff1c4 60%,#f2c35e 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .d-name .en{font-family:Georgia,"Times New Roman",serif;font-style:italic;color:#dfe9ff;margin-top:.15em}
+  .tags{display:flex;flex-wrap:wrap;gap:.4em;margin-top:.5em}
+  .tag{font-size:.78em;font-weight:700;padding:.2em .8em;border-radius:999px;background:rgba(190,205,240,.16);border:1.5px solid var(--line)}
+  .tag.gold{background:linear-gradient(180deg,#fff1c4,#ffd77a);color:var(--navy);border-color:transparent}
+  .nick{font-size:1.2em;font-weight:900;color:var(--gold);text-shadow:0 1px 6px rgba(4,10,50,.6)}
+  .facts{list-style:none;display:grid;gap:.32em}
+  .facts li{position:relative;padding:.38em .8em .38em 2em;border-radius:.8em;background:rgba(4,9,36,.5);line-height:1.5}
+  .facts li::before{content:"♪";position:absolute;left:.7em;color:var(--gold);font-weight:900}
+  .listen{padding:.6em .9em;border-radius:.8em;line-height:1.5;color:#3d2f00;background:linear-gradient(180deg,#fff8d6,#ffe9a2)}
+  .listen b{display:block;font-size:.82em;letter-spacing:.1em;color:#a06a00}
+  .works-lab{font-size:.82em;font-weight:700;letter-spacing:.14em;color:var(--gold)}
+  .works{display:flex;flex-wrap:wrap;gap:.45em}
+  .work{padding:.3em .9em;border-radius:999px;font-weight:700;color:var(--navy);background:linear-gradient(180deg,var(--cream1),var(--cream2));box-shadow:0 2px 0 rgba(120,100,40,.22)}
+  .works-lab small{font-weight:500;letter-spacing:0;color:var(--muted)}
+  span.work{background:rgba(190,205,240,.16);color:#fff;border:1.5px solid var(--line);box-shadow:none}
+  button.work{font:inherit;font-weight:700;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.4em;transition:transform .12s}
+  button.work i{font-style:normal;font-size:.75em;width:1.7em;height:1.7em;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff}
+  button.work:hover,button.work:focus-visible{transform:translateY(-2px);outline:none;box-shadow:0 4px 0 rgba(120,100,40,.22),0 0 16px rgba(255,236,170,.6)}
+  button.work.on{background:linear-gradient(180deg,#fff1c4,#ffd77a);animation:pulseW 1s ease-in-out infinite}
+  @keyframes pulseW{50%{box-shadow:0 0 0 5px rgba(255,220,140,.45)}}
+  .nav{margin-top:auto;display:flex;justify-content:space-between;gap:8px}
+  footer{font-size:clamp(12px,1.5vh,24px);color:rgba(235,240,255,.75);text-align:center;text-shadow:0 1px 4px rgba(4,10,50,.8)}
+
+  @media (orientation:landscape) and (min-width:821px){
+    .wrap{height:100dvh}
+    .grid{min-height:0}
+    .who svg{flex:1 1 0;height:0;min-height:0;aspect-ratio:200/220}
+    .detail{min-height:0}
+  }
+  @media (orientation:portrait), (max-width:820px){
+    .main{grid-template-columns:1fr}
+    .detail{order:-1}
+    .grid{grid-template-columns:repeat(4,1fr)}
+    .who svg{height:clamp(54px,16vw,150px)}
+  }
+  @media (max-width:520px){ .grid{grid-template-columns:repeat(3,1fr)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>音樂家<small>COMPOSERS · 認識偉大的作曲家</small></h1>
+    <a class="btn" href="index.html">← 回音樂盒</a>
+  </header>
+  <div class="main">
+    <nav class="panel grid" id="grid" aria-label="選一位音樂家"></nav>
+    <article class="panel detail" id="detail" aria-live="polite"></article>
+  </div>
+  <footer>Ray's Classroom Lab · 班級音樂盒｜頭像為 Low Poly 風格的想像插畫｜Design by Ray Chen／陳耿睿</footer>
+</div>
+
+<script>
+(function(){
+  /* ---------- 音樂家資料 ---------- */
+  const C = [
+    {id:'vivaldi', zh:'韋瓦第', en:'Antonio Vivaldi', yr:'1678–1741', land:'義大利', era:'巴洛克時期', nick:'紅髮神父',
+     facts:['他有一頭紅頭髮，又是神父，所以大家叫他「紅髮神父」。','他在威尼斯的女子孤兒院教音樂，為學生寫了很多協奏曲。','最有名的《四季》用小提琴描寫春、夏、秋、冬的景色。'],
+     works:['《四季》','《榮耀頌》'], look:{hair:'wig', hc:['#c8552b','#e57f4a','#963a1c'], coat:'#3a2a52', bg:'#f2c08a'}},
+    {id:'bach', zh:'巴哈', en:'Johann Sebastian Bach', yr:'1685–1750', land:'德國', era:'巴洛克時期', nick:'音樂之父',
+     facts:['出生在音樂世家，家族裡好幾代都是音樂家。','他是很厲害的管風琴家，在教堂工作，寫了非常多的樂曲。','他有 20 個孩子，其中好幾個後來也成為作曲家。'],
+     works:['《d 小調觸技曲與賦格》','《耶穌，世人仰望的喜悅》','《C 大調前奏曲》','〈詼諧曲〉','《布蘭登堡協奏曲》','《G 弦之歌》'], look:{hair:'wig', hc:['#e9e6df','#ffffff','#b9b4aa'], coat:'#5a2f2a', bg:'#9cc3e6', heavy:true}},
+    {id:'haydn', zh:'海頓', en:'Joseph Haydn', yr:'1732–1809', land:'奧地利', era:'古典時期', nick:'交響曲之父',
+     facts:['他寫了 100 多首交響曲，所以被稱為「交響曲之父」。','他很幽默，《驚愕交響曲》故意在安靜的地方突然很大聲。','他是莫札特的好朋友，也教過貝多芬。'],
+     works:['《驚愕交響曲》','《告別交響曲》','《皇帝四重奏》'], look:{hair:'wig', hc:['#dcdad6','#f7f6f2','#aaa7a0'], coat:'#2f4a7a', bg:'#b8e0c8'}},
+    {id:'mozart', zh:'莫札特', en:'Wolfgang Amadeus Mozart', yr:'1756–1791', land:'奧地利', era:'古典時期', nick:'音樂神童',
+     facts:['5 歲就會作曲，6 歲開始跟著爸爸到歐洲各地表演。','他只活了 35 歲，卻寫了 600 多首作品。','《小星星變奏曲》把大家熟悉的旋律變出 12 種花樣。'],
+     works:['《小星星變奏曲》','《小夜曲》','《土耳其進行曲》','《第四十號交響曲》','《C 大調鋼琴奏鳴曲》','《魔笛》'], look:{hair:'wig', hc:['#efeae0','#ffffff','#c2bcae'], coat:'#b23a48', bg:'#f6d98a', young:true}},
+    {id:'beethoven', zh:'貝多芬', en:'Ludwig van Beethoven', yr:'1770–1827', land:'德國', era:'古典到浪漫時期', nick:'樂聖',
+     facts:['他後來耳朵漸漸聽不見，仍然靠著心裡的聲音繼續作曲。','《命運交響曲》開頭的「登登登登——」是全世界最有名的四個音。','第九號交響曲裡的〈歡樂頌〉，到現在大家都還在唱。'],
+     works:['《命運交響曲》','〈歡樂頌〉','《給愛麗絲》','《月光奏鳴曲》','《田園交響曲》'], look:{hair:'wild', hc:['#6b6f7a','#9aa0ad','#3f424b'], coat:'#2b2f3a', bg:'#e59a7a', scarf:'#c0392b', frown:true}},
+    {id:'schubert', zh:'舒伯特', en:'Franz Schubert', yr:'1797–1828', land:'奧地利', era:'浪漫時期', nick:'歌曲之王',
+     facts:['他寫了 600 多首歌曲，所以被稱為「歌曲之王」。','他戴著圓圓的眼鏡，常常和朋友聚在一起唱歌、彈琴。','《鱒魚》描寫小魚在清澈的溪水裡游來游去。'],
+     works:['《鱒魚》','《野玫瑰》','《搖籃曲》','《軍隊進行曲》'], look:{hair:'wavy', hc:['#4a3524','#6e5036','#2e2015'], coat:'#3d5a45', bg:'#c9d8f2', glasses:true}},
+    {id:'chopin', zh:'蕭邦', en:'Frédéric Chopin', yr:'1810–1849', land:'波蘭', era:'浪漫時期', nick:'鋼琴詩人',
+     facts:['他幾乎只為鋼琴寫音樂，彈起來像在唸詩，所以叫「鋼琴詩人」。','他很愛自己的祖國波蘭，把波蘭的舞曲寫進音樂裡。','《小狗圓舞曲》描寫小狗追著自己尾巴轉圈圈。'],
+     works:['《小狗圓舞曲》','《夜曲》','《英雄波蘭舞曲》'], look:{hair:'wavy', hc:['#5a4032','#7d5b47','#38271d'], coat:'#22263a', bg:'#d9c2ec'}},
+    {id:'saint', zh:'聖桑', en:'Camille Saint-Saëns', yr:'1835–1921', land:'法國', era:'浪漫時期', nick:'動物狂歡節的作者',
+     facts:['他從小就是鋼琴神童，也很喜歡天文學和旅行。','《動物狂歡節》用樂器模仿獅子、大象、袋鼠和烏龜。','其中最有名的一首是大提琴演奏的〈天鵝〉。'],
+     works:['《動物狂歡節》','〈天鵝〉','《骷髏之舞》'], look:{hair:'short', hc:['#8b8f98','#b9bdc6','#5f636b'], coat:'#3a3340', bg:'#a8dcd9', beard:true, bc:['#9a9ea7','#c7cbd3','#6c7078']}},
+    {id:'tchaikovsky', zh:'柴可夫斯基', en:'Pyotr Ilyich Tchaikovsky', yr:'1840–1893', land:'俄國', era:'浪漫時期', nick:'芭蕾音樂大師',
+     facts:['他寫了三部很有名的芭蕾舞劇音樂。','《胡桃鉗》講的是聖誕夜裡，玩具和糖果活過來的故事。','他的音樂旋律優美，常常讓人想跟著跳舞。'],
+     works:['《胡桃鉗》','《天鵝湖》','《睡美人》'], look:{hair:'short', hc:['#d9dadd','#f4f4f6','#a5a7ad'], coat:'#1f2a44', bg:'#f2b8c6', beard:true, bc:['#e3e4e7','#ffffff','#b0b2b8']}},
+    {id:'dvorak', zh:'德弗札克', en:'Antonín Dvořák', yr:'1841–1904', land:'捷克', era:'浪漫時期', nick:'愛火車的作曲家',
+     facts:['他非常喜歡火車，常常跑去車站看火車頭。','他到美國工作時寫了《新世界交響曲》。','其中一段慢慢的旋律，後來被填上歌詞變成〈念故鄉〉。'],
+     works:['《新世界交響曲》','〈念故鄉〉','《幽默曲》'], look:{hair:'short', hc:['#3a2c22','#59463a','#221811'], coat:'#4a3626', bg:'#bfe0a6', beard:true, bc:['#3f3026','#5f4c3f','#261b13']}},
+    {id:'grieg', zh:'葛利格', en:'Edvard Grieg', yr:'1843–1907', land:'挪威', era:'浪漫時期', nick:'北歐的蕭邦',
+     facts:['他把挪威的民謠和山林風景寫進音樂裡。','《皮爾金組曲》裡的〈山魔王的大廳〉越來越快、越來越大聲。','同一組曲裡的〈清晨〉則是安靜美麗的日出。'],
+     works:['〈山魔王的大廳〉','〈清晨〉','《a 小調鋼琴協奏曲》','《皮爾金組曲》'], look:{hair:'wild', hc:['#dfe1e6','#ffffff','#a9adb6'], coat:'#2e3d4f', bg:'#9fc6ee', mustache:true, bc:['#e6e8ec','#ffffff','#b5b9c2']}},
+    {id:'debussy', zh:'德布西', en:'Claude Debussy', yr:'1862–1918', land:'法國', era:'印象樂派', nick:'用聲音畫畫的人',
+     facts:['他的音樂像一幅朦朧的畫，讓人想到光影、雲和水。','《月光》是一首安靜又夢幻的鋼琴曲。','他為女兒寫了《兒童天地》，裡面有可愛的〈黑娃娃步態舞〉。'],
+     works:['《月光》','《兒童天地》','《海》'], look:{hair:'fringe', hc:['#231c1a','#3d3230','#120e0d'], coat:'#3a3a3a', bg:'#a9b8e8', beard:true, bc:['#261e1c','#40342f','#140f0e']}}
+  ];
+
+
+  /* 補充小故事＋聆聽提示 */
+  const MORE = {
+    vivaldi:{f:['他一生寫了大約 500 首協奏曲，數量非常驚人。','《四季》的每一首前面都附了一首短詩，說明音樂在描寫什麼景色。'], l:'聽〈春〉的時候，找找看小提琴在哪裡模仿小鳥的叫聲。'},
+    bach:{f:['年輕時他曾經走了好幾百公里的路，只為了去聽一位管風琴大師演奏。','他去世後，音樂有一段時間被大家忘記，後來作曲家孟德爾頌重新演出他的作品，才又受到重視。'], l:'巴哈的音樂常常有好幾條旋律同時進行，試著只跟著其中一條聽聽看。'},
+    haydn:{f:['他在艾斯特哈齊親王家裡當了將近 30 年的樂團指揮兼作曲家。','《告別交響曲》的最後，樂手一個接一個離開舞台，用來提醒親王該讓大家放假回家了。'], l:'聽《驚愕交響曲》第二樂章，先是輕輕的旋律，注意哪裡會突然很大聲。'},
+    mozart:{f:['爸爸是小提琴家，也是他的第一位音樂老師；姊姊也很會彈琴，小時候常常一起表演。','歌劇、交響曲、協奏曲、鋼琴曲……幾乎每一種音樂他都寫過。'], l:'《土耳其進行曲》模仿土耳其軍樂隊，聽聽看那種咚、咚、咚咚咚的節奏。'},
+    beethoven:{f:['他出生在德國的波昂，長大後搬到「音樂之都」維也納生活。','他喜歡到郊外散步，隨身帶著筆記本記下想到的旋律，《田園交響曲》就是在描寫大自然。'], l:'《命運交響曲》的「短短短長」節奏會一直出現，數數看你聽到幾次。'},
+    schubert:{f:['他只活了 31 歲，卻留下了一千首左右的作品。','朋友們常常聚在一起聽他的新作品，這種聚會後來就叫「舒伯特之夜」。'], l:'聽《鱒魚》的鋼琴伴奏，像不像溪水一跳一跳、亮晶晶的樣子？'},
+    chopin:{f:['他 7 歲就寫出了第一首波蘭舞曲。','20 歲離開波蘭後，他主要住在法國巴黎，之後再也沒有回到故鄉。'], l:'《小狗圓舞曲》一開始，右手的音一直繞圈圈，想像小狗在追自己的尾巴。'},
+    saint:{f:['他 10 歲就公開舉辦鋼琴演奏會。','《動物狂歡節》是他寫著好玩的，他在世時只同意讓〈天鵝〉這一首公開出版。'], l:'〈大象〉是用樂團裡最大、聲音最低的低音提琴演奏的，聽起來是不是很笨重？'},
+    tchaikovsky:{f:['他原本念的是法律，還當過公務員，後來才進音樂學院專心學音樂。','《1812 序曲》的最後會出現大砲的聲音，非常壯觀。'], l:'《胡桃鉗》的〈糖梅仙子之舞〉用了鋼片琴，聽聽看那種叮叮咚咚、像糖果一樣的聲音。'},
+    dvorak:{f:['他出生在捷克的小村莊，從小就會拉小提琴。','除了火車，他也喜歡養鴿子，很愛大自然。'], l:'《幽默曲》的節奏一跳一跳的，試著用手指跟著點點看。'},
+    grieg:{f:['他的口袋裡常常放著一隻小青蛙玩偶，上台前會摸一摸當作幸運物。','他的《a 小調鋼琴協奏曲》一開始就是轟隆隆的定音鼓，接著鋼琴從高音一路衝下來。'], l:'〈山魔王的大廳〉同一段旋律反覆很多次，聽聽看它怎麼越來越快、越來越大聲。'},
+    debussy:{f:['他 10 歲就進入巴黎音樂院學音樂。','他很喜歡東方藝術，《海》的樂譜封面就用了日本浮世繪的海浪圖案。'], l:'聽《月光》的時候可以閉上眼睛，想像月光輕輕灑在水面上。'}
+  };
+  C.forEach(c => { c.facts = c.facts.concat(MORE[c.id].f); c.listen = MORE[c.id].l; });
+
+  /* ---------- Low Poly 頭像產生器（2D 多面體） ---------- */
+  const P = (pts, fill, extra) => `<polygon points="${pts}" fill="${fill}"${extra||''}/>`;
+  function shade(hex, k){ const n = parseInt(hex.slice(1),16); let r = n>>16, g = n>>8&255, b = n&255;
+    const f = v => Math.max(0, Math.min(255, Math.round(k < 0 ? v*(1+k) : v + (255-v)*k)));
+    return '#' + [f(r),f(g),f(b)].map(v => v.toString(16).padStart(2,'0')).join(''); }
+  function portrait(L){
+    const [h, hl, hd] = L.hc, skin = '#f1c9a5', bg = L.bg, coat = L.coat;
+    let s = `<svg viewBox="0 0 200 220" role="img">`;
+    // 背景切面
+    s += P('0,0 200,0 200,220 0,220', bg) + P('0,0 120,0 0,110', shade(bg,.22)) + P('200,0 200,130 110,0', shade(bg,-.1)) + P('0,110 70,220 0,220', shade(bg,-.16)) + P('200,130 200,220 120,220', shade(bg,.12));
+    // 後方頭髮
+    if (L.hair === 'wig')   s += P('56,78 40,104 46,132 34,156 62,168 100,150 138,168 166,156 154,132 160,104 144,78 100,56', hd);
+    if (L.hair === 'wild')  s += P('50,112 34,96 44,82 28,64 50,60 44,36 70,44 84,22 104,38 124,20 134,44 158,36 152,62 172,70 158,86 168,104 150,112 100,60', hd);
+    if (L.hair === 'fringe')s += P('54,104 50,70 68,46 100,38 132,46 150,70 146,104 100,60', hd);
+    // 衣服
+    s += P('24,220 40,178 82,160 100,176 118,160 160,178 176,220', coat) + P('24,220 40,178 82,160 70,220', shade(coat,.16)) + P('118,160 160,178 176,220 130,220', shade(coat,-.2));
+    s += P('82,160 100,176 88,200 70,180', shade(coat,.3)) + P('118,160 100,176 112,200 130,180', shade(coat,-.05));
+    // 領巾
+    const sc = L.scarf || '#fbf8f0';
+    s += P('86,158 114,158 110,182 100,192 90,182', sc) + P('100,158 114,158 110,182 100,192', shade(sc,-.14));
+    // 脖子與臉
+    s += P('84,138 116,138 114,162 100,170 86,162', shade(skin,-.16));
+    s += P('68,70 132,70 144,100 136,138 100,158 64,138 56,100', skin);
+    s += P('68,70 100,70 100,110 56,100', shade(skin,.12)) + P('100,70 132,70 144,100 100,110', shade(skin,-.05));
+    s += P('100,110 144,100 136,138 100,158', shade(skin,-.14)) + P('56,100 100,110 100,158 64,138', shade(skin,.02));
+    if (L.heavy) s += P('64,138 100,158 136,138 128,150 100,166 72,150', shade(skin,-.2));
+    // 鼻子
+    s += P('100,96 108,120 100,124', shade(skin,-.24)) + P('100,96 100,124 94,120', shade(skin,.16));
+    // 眼睛、眉毛
+    const eb = shade(hd,-.2), ey = L.frown ? 2 : 0;
+    s += P(`72,${92+ey} 90,${95+ey*2} 90,${98+ey*2} 72,${96+ey}`, eb) + P(`128,${92+ey} 110,${95+ey*2} 110,${98+ey*2} 128,${96+ey}`, eb);
+    s += P('76,102 82,99 88,102 82,106', '#232a4a') + P('112,102 118,99 124,102 118,106', '#232a4a');
+    s += '<circle cx="83.500" cy="101.500" r="1.200" fill="#fff"/><circle cx="119.500" cy="101.500" r="1.200" fill="#fff"/>'.replace(/\.(\d)00/g, '.$1');
+    if (L.young) s += P('66,116 76,112 78,120 70,124', '#f4a9a0', ' opacity=".6"') + P('134,116 124,112 122,120 130,124', '#f4a9a0', ' opacity=".6"');
+    // 嘴
+    if (!L.beard && !L.mustache) s += L.frown ? P('88,138 100,134 112,138 100,137', '#a4574b') : P('88,134 100,137 112,134 100,142', '#b5645a');
+    // 鬍子
+    if (L.beard){ const [b, bl, bd] = L.bc;
+      s += P('58,112 64,140 82,170 100,182 118,170 136,140 142,112 128,128 100,126 72,128', b) + P('100,126 128,128 142,112 136,140 118,170 100,182', bd) + P('72,128 100,126 100,150 80,150', bl);
+      s += P('78,128 100,121 122,128 112,134 100,130 88,134', bd) + P('92,140 108,140 100,145', '#8a4a42'); }
+    if (L.mustache){ const [b, bl, bd] = L.bc;
+      s += P('62,134 80,124 100,122 120,124 138,134 122,138 100,130 78,138', b) + P('100,122 120,124 138,134 122,138 100,130', bd) + P('90,140 110,140 100,146', '#a4574b'); }
+    // 前方頭髮
+    if (L.hair === 'wig'){
+      s += P('56,100 60,70 76,50 100,42 124,50 140,70 144,100 132,72 100,64 68,72', h) + P('76,50 100,42 100,64 68,72', hl) + P('100,42 124,50 132,72 100,64', shade(h,-.06));
+      s += P('56,100 44,110 50,126 40,138 54,150 64,138 56,118', h) + P('44,110 50,126 56,118 56,100', hl) + P('40,138 54,150 50,126', hl);
+      s += P('144,100 156,110 150,126 160,138 146,150 136,138 144,118', shade(h,-.1)) + P('156,110 150,126 144,118 144,100', h) + P('160,138 146,150 150,126', h);
+    }
+    if (L.hair === 'wild'){
+      s += P('56,104 46,84 58,74 50,52 72,58 86,36 104,50 122,34 132,56 152,52 144,76 156,92 144,104 132,74 100,66 68,74', h);
+      s += P('50,52 72,58 68,74 58,74', hl) + P('86,36 104,50 100,66 72,58', hl) + P('122,34 132,56 132,74 100,66 104,50', shade(h,-.08)) + P('152,52 144,76 132,74 132,56', hd);
+    }
+    if (L.hair === 'wavy'){
+      s += P('54,104 52,74 70,48 104,40 136,52 148,80 146,106 138,84 120,68 94,74 74,66 62,86', h) + P('70,48 104,40 94,74 74,66', hl) + P('104,40 136,52 148,80 138,84 120,68 94,74', shade(h,-.1)) + P('52,74 70,48 74,66 62,86 54,104', shade(h,.06));
+    }
+    if (L.hair === 'short'){
+      s += P('56,98 58,70 74,50 104,44 130,54 142,76 144,98 132,74 100,66 68,74', h) + P('74,50 104,44 100,66 68,74', hl) + P('104,44 130,54 142,76 132,74 100,66', shade(h,-.1));
+    }
+    if (L.hair === 'fringe'){
+      s += P('54,100 56,66 76,46 108,42 134,54 146,78 146,100 138,86 126,92 112,78 96,90 80,78 66,92', h) + P('76,46 108,42 96,90 80,78 66,92 56,66', hl) + P('108,42 134,54 146,78 138,86 126,92 112,78', shade(h,-.12));
+    }
+    if (L.glasses) s += '<g fill="rgba(255,255,255,.18)" stroke="#2a2a3a" stroke-width="2.4"><circle cx="82" cy="102" r="11"/><circle cx="118" cy="102" r="11"/><path d="M93 102h14" fill="none"/></g>';
+    return s + '</svg>';
+  }
+
+
+  /* ---------- 代表作主題片段（簡化的單旋律，瀏覽器合成鋼琴音色） ---------- */
+  const T = 1/3, R = null;
+  const rp = (a, n) => Array.from({length:n}, () => a).flat();
+  const seq = (ms, d) => ms.map(m => [m, d]);
+  const THEMES = {
+    spring:{bpm:104, n:[[64,.5],[68,.5],[68,.5],[68,.5],[66,.25],[64,.25],[71,1.5],[71,.25],[69,.25],[68,.5],[68,.5],[68,.5],[66,.25],[64,.25],[71,2]]},
+    toccata:{bpm:80, n:[[81,.2],[79,.2],[81,2],[R,.6],[79,.25],[77,.25],[76,.25],[74,.25],[73,1],[74,2.5]]},
+    jesu:{bpm:72, n:[[R,T],...seq([67,69,71,74,72,72,76,74,74,79,78,79,74,71,67,69,71,72,74,76,74,72,71,69,71],T),[67,1.5]]},
+    surprise:{bpm:112, n:[...seq([60,60,64,64,67,67],.5).map(x=>[...x,.35]),[64,1,.35],...seq([65,65,62,62,59,59],.5).map(x=>[...x,.35]),[55,1,.35],
+              ...seq([60,60,64,64,67,67],.5).map(x=>[...x,.25]),[64,1,.25],...seq([72,72,66,66],.5).map(x=>[...x,.2]),[67,1,.2],[R,.5],[[43,55,59,62,67],2,1.3]]},
+    twinkle:{bpm:120, n:[...seq([60,60,67,67,69,69],1),[67,2],...seq([65,65,64,64,62,62],1),[60,2]]},
+    nacht:{bpm:132, n:[[67,1],[R,.5],[62,.5],[67,1],[R,.5],[62,.5],[67,.5],[62,.5],[67,.5],[71,.5],[74,1],[R,1],[72,1],[R,.5],[69,.5],[72,1],[R,.5],[69,.5],[72,.5],[69,.5],[66,.5],[69,.5],[62,1.5]]},
+    turk:{bpm:126, n:[...seq([71,69,68,69],.25),[72,.5],[R,.5],...seq([74,72,71,72],.25),[76,.5],[R,.5],...seq([77,76,75,76,83,81,80,81,83,81,80,81],.25),[84,1.5]]},
+    fifth:{bpm:108, n:[[R,.5],[55,.5,1.2],[55,.5,1.2],[55,.5,1.2],[51,2.5,1.3],[R,.5],[53,.5,1.2],[53,.5,1.2],[53,.5,1.2],[50,3,1.3]]},
+    ode:{bpm:120, n:[...seq([64,64,65,67,67,65,64,62,60,60,62,64],1),[64,1.5],[62,.5],[62,2]]},
+    elise:{bpm:72, n:[...seq([76,75,76,75,76,71,74,72],.25),[69,.5],[R,.25],...seq([60,64,69],.25),[71,.5],[R,.25],...seq([64,68,71],.25),[72,1]]},
+    moon:{bpm:54, n:[...rp(seq([56,61,64],T),8),...rp(seq([57,61,64],T),2),...rp(seq([57,62,66],T),2),[56,1.5]]},
+    minute:{bpm:160, n:[...seq([80,79,80,84,82],.5),...rp(seq([79,80,84,82],.5),3),[80,2]]},
+    nocturne:{bpm:66, n:[[70,.5],[79,2],[77,.5],[79,.5],[77,1.5],[75,2.5]]},
+    swan:{bpm:84, n:[[79,2],[78,1],[71,1],[76,1],[74,1],[67,2],[69,1],[71,1],[72,3]]},
+    swanlake:{bpm:88, n:[[78,2],...seq([71,73,74,76],.5),[78,1.5],[74,.5],[78,1.5],[74,.5],[78,1.5],[71,.5],...seq([74,71,67,74],.5),[71,3]]},
+    sugar:{bpm:100, n:[...seq([79,76,79,78],.5),[75,1],[76,1],[74,.25],[74,.25],[74,.5],[73,.25],[73,.25],[73,.5],[72,.25],[72,.25],[72,.5],...seq([71,76,72,76],.5),[71,1.5]]},
+    largo:{bpm:60, n:[[64,1.5],[67,.5],[67,2],[64,1.5],[62,.5],[60,2],...seq([62,64,67,64],1),[62,3]]},
+    mk:{bpm:126, n:[...seq([59,61,62,64,66,62],.5),[66,1],[65,.5],[61,.5],[65,1],[64,.5],[60,.5],[64,1],...seq([59,61,62,64,66,62,66,71,69,66,62,66],.5),[69,2]]},
+    sym40:{bpm:108, n:[...rp([[75,.5],[74,.5],[74,1]],3),[82,1],[R,1],[82,.5],[81,.5],[79,1],[79,.5],[77,.5],[75,1],[75,.5],[74,.5],[72,1],[72,2]]},
+    k545:{bpm:126, n:[[72,2],[76,1],[79,1],[71,1.5],[72,.25],[74,.25],[72,2],[81,2],[79,1],[84,1],[79,1],[77,.5],[76,.25],[77,.25],[76,2]]},
+    prelude:{bpm:76, n:[...rp(seq([60,64,67,72,76,67,72,76],.25),2),...rp(seq([60,62,69,74,77,69,74,77],.25),2),...rp(seq([59,62,67,74,77,67,74,77],.25),2),...rp(seq([60,64,67,72,76,67,72,76],.25),2),[[48,60,64,67,72],2.5]]},
+    badinerie:{bpm:100, n:[[83,.5],[86,.25],[83,.25],[78,.5],[83,.25],[78,.25],[74,.5],[78,.25],[74,.25],[71,1],...seq([66,71,74,71,73,71,73,71,70,73,76,73],.25),[74,.5],[71,1.5]]},
+    emperor:{bpm:76, n:[[67,1.5],[69,.5],[71,1],[69,1],[72,1],[71,1],[69,.5],[66,.5],[67,1],[76,1],[74,1],[72,1],[71,1],[69,1],[71,.5],[67,.5],[74,2.5]]},
+    pastoral:{bpm:100, n:[[R,.5],[69,.5],[70,.5],[74,.5],[72,1],[70,.5],[69,.25],[67,.25],[60,1],[65,.5],[67,.5],[69,.5],[70,.25],[69,.25],[67,2.5]]},
+    trout:{bpm:96, n:[[69,.5],[74,.5],[74,.5],[78,.5],[78,.5],[74,1],[69,.5],[69,.5],[69,.75],[76,.25],...seq([74,73,71,73],.25),[74,2]]},
+    griegpc:{bpm:84, n:[[93,.75,1.1],[92,.25,1.1],[88,1,1.1],[81,.75,1.1],[80,.25,1.1],[76,1,1.1],[69,.75,1.1],[68,.25,1.1],[64,1,1.1],[[45,57,60,64,69],3,1.2]]},
+    morning:{bpm:66, n:[...seq([71,68,66,64,66,68,71,68,66,64],.5),...seq([66,68,66,68],.25),...seq([71,68,71,73,68,73,71,68,66],.5),[64,2]]}
+  };
+  const PLAY = {'《四季》':'spring','《d 小調觸技曲與賦格》':'toccata','《耶穌，世人仰望的喜悅》':'jesu','《驚愕交響曲》':'surprise','《小星星變奏曲》':'twinkle','《小夜曲》':'nacht','《土耳其進行曲》':'turk',
+    '《命運交響曲》':'fifth','〈歡樂頌〉':'ode','《給愛麗絲》':'elise','《月光奏鳴曲》':'moon','《小狗圓舞曲》':'minute','《夜曲》':'nocturne','〈天鵝〉':'swan','《天鵝湖》':'swanlake','《胡桃鉗》':'sugar',
+    '《新世界交響曲》':'largo','〈念故鄉〉':'largo','〈山魔王的大廳〉':'mk','〈清晨〉':'morning',
+    '《第四十號交響曲》':'sym40','《C 大調鋼琴奏鳴曲》':'k545','《C 大調前奏曲》':'prelude','〈詼諧曲〉':'badinerie','《皇帝四重奏》':'emperor','《田園交響曲》':'pastoral','《鱒魚》':'trout','《a 小調鋼琴協奏曲》':'griegpc'};
+  let actx = null, bus = null, playEl = null, endT = 0;
+  function pianoNote(t, midi, dur, vel){
+    const f = 440*Math.pow(2,(midi-69)/12), off = t + dur;
+    for (let n = 1; n <= 7; n++){
+      const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f*n*(1+.0004*n*n);
+      const a = .26*vel*Math.pow(n,-1.2)*Math.exp(-(n-1)*.35);
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(a,t+.006); g.gain.setTargetAtTime(0,t+.006,1.3/(1+n*.5)); g.gain.setTargetAtTime(0,off,.12);
+      o.connect(g).connect(bus); o.start(t); o.stop(off+.9);
+    }
+  }
+  function stopTheme(){
+    clearTimeout(endT);
+    if (bus){ try { bus.gain.setTargetAtTime(0, actx.currentTime, .03); const b = bus; setTimeout(() => b.disconnect(), 250); } catch(e){} bus = null; }
+    if (playEl){ playEl.classList.remove('on'); playEl = null; }
+  }
+  function playTheme(key, el){
+    const same = playEl === el; stopTheme(); if (same) return;
+    try {
+      if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      bus = actx.createGain(); bus.gain.value = .9; bus.connect(actx.destination);
+      const th = THEMES[key], spb = 60/th.bpm; let t = actx.currentTime + .08;
+      th.n.forEach(([m, d, v]) => { if (m !== null) (Array.isArray(m) ? m : [m]).forEach(x => pianoNote(t, x, d*spb, v || .8)); t += d*spb; });
+      playEl = el; el.classList.add('on');
+      endT = setTimeout(stopTheme, (t - actx.currentTime + 1.2)*1000);
+    } catch(e){}
+  }
+
+  /* ---------- 介面 ---------- */
+  const grid = document.getElementById('grid'), detail = document.getElementById('detail');
+  let cur = 0;
+  grid.innerHTML = C.map((c, i) => `<button class="who" data-i="${i}" aria-label="${c.zh}">${portrait(c.look)}<b>${c.zh}</b><small>${c.land}</small></button>`).join('');
+  detail.addEventListener('click', e => { const b = e.target.closest('.work.play'); if (b) playTheme(b.dataset.t, b); });
+  function show(i, scroll){
+    stopTheme();
+    cur = (i + C.length) % C.length; const c = C[cur];
+    grid.querySelectorAll('.who').forEach((b, k) => b.classList.toggle('on', k === cur));
+    detail.innerHTML = `
+      <div class="d-top">${portrait(c.look)}
+        <div class="d-name"><h2>${c.zh}</h2><div class="en">${c.en}</div>
+          <div class="tags"><span class="tag gold">${c.era}</span><span class="tag">${c.land}</span><span class="tag">${c.yr}</span></div></div>
+      </div>
+      <div class="nick">「${c.nick}」</div>
+      <ul class="facts">${c.facts.map(f => `<li>${f}</li>`).join('')}</ul>
+      <div class="listen"><b>🎧 聽聽看</b>${c.listen}</div>
+      <div class="works-lab">代表作品<small>　有 ▶ 的可以點一下，聽一小段主題</small></div>
+      <div class="works">${c.works.map(w => PLAY[w] ? `<button class="work play" data-t="${PLAY[w]}" aria-label="播放${w}的主題片段"><i>▶</i>${w}</button>` : `<span class="work">${w}</span>`).join('')}</div>
+      <div class="nav"><button class="btn" id="prev">← 上一位</button><button class="btn" id="next">下一位 →</button></div>`;
+    document.getElementById('prev').onclick = () => show(cur-1);
+    document.getElementById('next').onclick = () => show(cur+1);
+    if (scroll && detail.getBoundingClientRect().top < 0) detail.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  grid.addEventListener('click', e => { const b = e.target.closest('.who'); if (b) show(+b.dataset.i, true); });
+  document.addEventListener('keydown', e => { if (e.key === 'ArrowRight') show(cur+1); if (e.key === 'ArrowLeft') show(cur-1); });
+  show(4);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>魔法音樂圖・一拍一個動作</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070d;--panel:#12121d;--line:#2a2a3d;--ink:#f4efe3;--muted:#9a95a8;--gold:#ffc94d}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);
+  background:radial-gradient(900px 500px at 15% -10%,#1c1530 0,transparent 60%),radial-gradient(800px 500px at 100% 0,#0f1f33 0,transparent 55%),var(--bg);
+  display:flex;flex-direction:column;min-height:100dvh}
+header{display:flex;align-items:center;gap:14px;padding:12px 18px 6px;flex-wrap:wrap}
+.logo{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none;
+  background:radial-gradient(circle,#ffcf6b33,transparent 70%);box-shadow:0 0 18px #ff9d2e66}
+h1{font-size:clamp(20px,2.4vw,28px);font-weight:900;letter-spacing:.03em;line-height:1.1;text-shadow:0 0 18px #ffb34766}
+h1 small{display:block;font-family:Fredoka,sans-serif;font-weight:600;font-size:.5em;color:var(--muted);letter-spacing:.1em;text-shadow:none}
+.head-right{margin-left:auto}
+.btn{font:inherit;font-weight:700;font-size:16px;border:1.5px solid #3a3a52;background:var(--panel);color:var(--ink);
+  border-radius:999px;padding:9px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:transform .08s,box-shadow .2s}
+.btn:hover{box-shadow:0 0 14px #ffc94d44}
+.btn:active{transform:scale(.96)}
+.btn.primary{background:linear-gradient(180deg,#ffd76e,#ff9f2e);color:#2a1600;border-color:transparent;box-shadow:0 0 18px #ff9f2e77}
+.tracks{display:flex;gap:10px;padding:6px 18px;overflow-x:auto}
+.track{flex:none;min-width:150px;max-width:210px;text-align:left;font:inherit;color:var(--ink);cursor:pointer;
+  border:1.5px solid var(--line);background:var(--panel);border-radius:16px;padding:10px 14px;display:flex;gap:10px;align-items:center;transition:border-color .2s,box-shadow .2s}
+.track.on{border-color:var(--c);box-shadow:0 0 18px color-mix(in srgb,var(--c) 45%,transparent)}
+.track svg{width:42px;height:32px;flex:none;filter:drop-shadow(0 0 4px var(--c))}
+.track b{font-size:16px;display:block;white-space:nowrap}
+.track span{font-size:12px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.track div{min-width:0}
+.tracks{scrollbar-width:thin;scrollbar-color:#3a3a52 transparent}
+.bar{display:flex;align-items:center;gap:10px;padding:8px 18px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1.5px solid #3a3a52;border-radius:999px;overflow:hidden;background:var(--panel)}
+.seg button{font:inherit;font-weight:700;font-size:14px;border:0;background:transparent;padding:8px 13px;cursor:pointer;color:var(--muted)}
+.seg button.on{background:#2b2b42;color:var(--ink)}
+.field{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--muted)}
+.field input{accent-color:var(--gold);width:110px}
+.field span{color:var(--ink);min-width:38px}
+.stats{margin-left:auto;display:flex;gap:8px}
+.stat{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:4px 12px;min-width:78px;text-align:center}
+.stat i{font-style:normal;display:block;font-size:11px;color:var(--muted);font-weight:700}
+.stat b{font-size:18px;line-height:1.3;white-space:nowrap}
+.task{margin:0 18px;padding:8px 14px;border-radius:12px;background:#0f0f19;border:1.5px dashed var(--line);font-size:14.5px;color:#d9d3c5;display:flex;gap:8px}
+.task b{white-space:nowrap;color:var(--gold)}
+.stage{position:relative;flex:1;min-height:380px;margin:10px 18px 0;border-radius:22px;overflow:hidden;background:#000;
+  border:1.5px solid #2c2c44;box-shadow:0 0 0 1px #000,0 0 40px #4b2d8a33 inset}
+canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.strip{margin:8px 18px 0;height:76px;border-radius:16px;border:1.5px solid var(--line);background:#05050a;overflow:hidden}
+.overlay{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)}
+.overlay.show{display:grid}
+.result{background:#11111c;border:1.5px solid #3a3a52;border-radius:22px;box-shadow:0 0 40px #ff9f2e44;padding:24px 30px;text-align:center;max-width:min(520px,92%)}
+.stars{font-size:46px;letter-spacing:6px;color:var(--gold);text-shadow:0 0 16px #ffb347}
+.result h2{font-size:26px;margin:4px 0}
+.big{font-family:Fredoka,sans-serif;font-size:56px;font-weight:700;line-height:1;text-shadow:0 0 20px #ffc94d88}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:14px 0}
+.chip{border-radius:999px;padding:4px 12px;font-size:13.5px;font-weight:700;color:#000}
+.result p{color:var(--muted);font-size:14px;margin-bottom:14px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;padding:12px 18px 4px}
+.lg{display:flex;align-items:center;gap:8px;background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:6px 14px 6px 8px;font-size:14px}
+.lg svg{width:40px;height:28px;filter:drop-shadow(0 0 4px #ffc94d)}
+.lg b{font-size:15px}
+.lg span{color:var(--muted);font-size:13px}
+footer{padding:8px 18px 12px;font-size:12px;color:#6f6a7c;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+header,.tracks,.bar,.task,.strip,.legend,footer{flex:none}
+.tracks{padding-bottom:8px}
+@media (max-width:720px){
+  header{padding:10px 12px 4px}
+  .tracks{padding:6px 12px 8px}
+  .track{min-width:128px;padding:8px 10px;gap:8px}
+  .track svg{width:32px;height:26px}
+  .track b{font-size:15px}
+  .bar{padding:6px 12px;gap:6px}
+  .btn{font-size:14px;padding:7px 12px}
+  .seg button{font-size:12.5px;padding:6px 9px}
+  .field input{width:80px}
+  .stats{margin-left:0;width:100%}
+  .stat{flex:1;padding:2px 8px}
+  .stat b{font-size:15px}
+  .task{margin:0 12px;font-size:13px}
+  .stage{margin:8px 12px 0;min-height:62vh}
+  .strip{margin:8px 12px 0;height:64px}
+  .legend{flex-wrap:nowrap;overflow-x:auto;padding:10px 12px 4px}
+  .lg{flex:none;font-size:13px}
+  .lg span{display:none}
+  footer{padding:6px 12px 12px}
+}
+</style>
+<style>
+/* ===== 班級音樂盒主題（與首頁一致：Low Poly 夜空背景＋深藍圓角面板＋奶油色按鈕） ===== */
+:root{--bg:#1b2f8f;--panel:rgba(8,18,66,.62);--line:rgba(255,255,255,.26);--ink:#f4f1ff;--muted:rgba(225,235,255,.78);--gold:#ffd77a}
+body{background:#1b2f8f}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(10,18,70,.55),rgba(10,18,70,.28) 35%,rgba(10,18,70,.5)),
+             url("bg.jpg") 50% 55%/cover no-repeat}
+body>*{position:relative;z-index:1}
+h1{background:linear-gradient(180deg,#fff 10%,#fff1c4 55%,#e9b44c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(30,40,120,.55)) drop-shadow(0 0 16px rgba(255,220,140,.3));text-shadow:none}
+h1 small{-webkit-text-fill-color:var(--gold);color:var(--gold);letter-spacing:.3em;font-family:"Noto Sans TC",sans-serif;font-weight:500}
+.logo{background:rgba(8,18,66,.6);border:1.5px dashed rgba(255,255,255,.5);box-shadow:0 0 18px rgba(255,220,140,.35)}
+.btn{background:var(--panel);border:1.5px dashed rgba(255,255,255,.5);color:#fff;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.btn:hover{box-shadow:0 0 16px rgba(255,236,170,.45)}
+.btn.primary{background:linear-gradient(180deg,#fffaf0,#f6ecd0);color:#17235f;border:none;
+  box-shadow:0 2px 0 rgba(120,100,40,.25),0 0 18px rgba(255,236,170,.45)}
+.track{background:rgba(190,205,240,.16);border:1.5px solid var(--line);border-radius:22px;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.track span{color:var(--muted)}
+.seg{background:var(--panel);border:1.5px dashed rgba(255,255,255,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.seg button{color:var(--muted)}
+.seg button.on{background:linear-gradient(180deg,#fffaf0,#f6ecd0);color:#17235f;border-radius:999px}
+.field{color:#fff;text-shadow:0 1px 4px rgba(4,10,50,.7)}
+.stat{background:rgba(190,205,240,.16);border:1.5px solid var(--line);border-radius:16px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.stat i{color:var(--muted)}
+.task{background:var(--panel);border:1.5px dashed rgba(255,255,255,.45);border-radius:18px;color:#eef2ff;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.stage{background:#0a1748;border:1.5px solid rgba(255,255,255,.3);border-radius:30px;box-shadow:0 10px 40px rgba(4,10,50,.45)}
+.strip{background:var(--panel);border:1.5px solid var(--line);border-radius:20px}
+.overlay{background:rgba(8,16,60,.55)}
+.result{background:rgba(8,18,66,.92);border:1.5px dashed rgba(255,255,255,.5);border-radius:28px;box-shadow:0 0 40px rgba(255,220,140,.35)}
+.result p{color:var(--muted)}
+.lg{background:rgba(190,205,240,.16);border:1.5px solid var(--line);border-radius:18px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.lg span{color:var(--muted)}
+footer{color:rgba(235,240,255,.78);text-shadow:0 1px 4px rgba(4,10,50,.8)}
+
+/* 控制列精簡：只留 開始／重來／設定，其餘選項收進「設定」選單 */
+.bar{z-index:5;padding:4px 18px;gap:8px;flex-wrap:nowrap}
+.bar .btn{padding:6px 14px;font-size:14.5px}
+.opts{display:none;position:absolute;top:calc(100% + 4px);left:18px;z-index:30;max-width:calc(100% - 36px);
+  flex-wrap:wrap;align-items:center;gap:8px;padding:12px;border-radius:20px;
+  background:rgba(8,18,66,.95);border:1.5px dashed rgba(255,255,255,.5);box-shadow:0 10px 30px rgba(4,10,50,.5)}
+.opts.show{display:flex}
+#optBtn[aria-expanded="true"]{background:linear-gradient(180deg,#fffaf0,#f6ecd0);color:#17235f;border-style:solid;border-color:transparent}
+.stats{margin-left:auto;width:auto;gap:6px}
+.stat{display:flex;align-items:baseline;gap:6px;padding:4px 12px;min-width:0;border-radius:999px}
+.stat i{display:inline;font-size:12px}
+.stat b{font-size:15px}
+@media (max-width:720px){
+  .bar{padding:4px 12px;gap:6px}
+  .bar .btn{padding:6px 10px;font-size:13.5px}
+  .opts{left:12px;max-width:calc(100% - 24px)}
+  .stats{width:auto;margin-left:auto}
+  .stat{flex:none;padding:3px 8px}
+  .stat i{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="12" stroke="#ffc94d" stroke-width="2" fill="none"/><circle cx="17" cy="17" r="7" stroke="#ff9f2e" stroke-width="1.5" fill="none" stroke-dasharray="2 3"/><circle cx="17" cy="17" r="2.5" fill="#fff"/></svg></div>
+  <h1>魔法音樂圖・一拍一個動作<small>MAGIC MUSICOGRAM · LISTENING MAP</small></h1>
+  <div class="head-right"><a class="btn" href="index.html" style="text-decoration:none">← 回音樂盒</a> <button class="btn" id="fsBtn">⛶ 全螢幕</button></div>
+</header>
+
+<div class="tracks" id="tracks"></div>
+
+<div class="bar">
+  <button class="btn primary" id="playBtn">▶ 開始</button>
+  <button class="btn" id="resetBtn">↺ 重來</button>
+  <button class="btn" id="optBtn" aria-expanded="false">⚙ 設定</button>
+  <div class="opts" id="opts">
+  <div class="seg" id="modeSeg"><button data-v="on" class="on">預告下一拍 開</button><button data-v="off">關</button></div>
+  <div class="seg" id="guideSeg"><button data-v="on" class="on">魔法光圈 開</button><button data-v="off">關（挑戰）</button></div>
+  <div class="seg" id="instSeg"><button data-v="orch" class="on">🎻 交響樂團</button><button data-v="piano">🎹 鋼琴</button><button data-v="musicbox">🎵 音樂盒</button></div>
+  <div class="seg" id="accSeg"><button data-v="on" class="on">伴奏 開</button><button data-v="off">關</button></div>
+  <label class="field">速度 <input type="range" id="speed" min="0.5" max="1.2" step="0.05" value="0.8"><span id="speedTxt">0.8×</span></label>
+  </div>
+  <div class="stats">
+    <div class="stat"><i>這一拍</i><b id="sSec">–</b></div>
+    <div class="stat"><i>跟得準</i><b id="sAcc">–</b></div>
+  </div>
+</div>
+
+<div class="task"><b>🎧 聆聽任務</b><span id="taskTxt"></span></div>
+
+<div class="stage" id="stage">
+  <canvas id="cv"></canvas>
+  <div class="overlay" id="overlay">
+    <div class="result">
+      <div class="stars" id="rStars">★★★</div>
+      <h2 id="rTitle">太棒了！</h2>
+      <div class="big" id="rAcc">0%</div>
+      <div class="chips" id="rChips"></div>
+      <p id="rTip"></p>
+      <button class="btn primary" id="againBtn">↺ 再玩一次</button>
+    </div>
+  </div>
+</div>
+<div class="strip"><canvas id="strip"></canvas></div>
+
+<div class="legend" id="legend"></div>
+<footer>
+  <span>Ray's Classroom Lab · Games｜樂曲為簡化改編，交響樂團／鋼琴／音樂盒音色由瀏覽器即時合成</span>
+  <span>Design by Ray Chen／陳耿睿</span>
+</footer>
+
+<script>
+/* ===================== 手勢 ===================== */
+const GEST={
+  rainbow: {name:'彩虹',  tip:'一個音・往上或一樣'},
+  swing:   {name:'盪鞦韆',tip:'一個音・往下'},
+  wave:    {name:'波浪',  tip:'一拍兩個音・一長一短'},
+  zigzag:  {name:'鋸齒',  tip:'一拍兩個音・一樣快'},
+  circle:  {name:'圓形',  tip:'2 拍長音'},
+  triangle:{name:'三角形',tip:'3 拍長音・一拍一邊'},
+  square:  {name:'正方形',tip:'4 拍長音・一拍一邊'},
+  star:    {name:'星星',  tip:'最後一個音／嚇一跳！'},
+};
+const CLOSED=new Set(['circle','triangle','square','star']);
+const POLY={
+  triangle:[[0,0],[.5,-.87],[1,0],[0,0]],
+  square:[[0,0],[0,-1],[1,-1],[1,0],[0,0]],
+  star:[[0,0],[.59,-1.81],[1.18,0],[-.36,-1.12],[1.54,-1.12],[0,0]].map(([x,y])=>[x*.55,y*.55]),
+};
+function polyAt(P,u){ const n=P.length-1, k=Math.min(n-1e-9,u*n), i=Math.floor(k), f=k-i; return [P[i][0]+(P[i+1][0]-P[i][0])*f, P[i][1]+(P[i+1][1]-P[i][1])*f]; }
+function shapeAt(type,u,x0,y0,y1,w,A,R,sg,up=1){
+  const PI=Math.PI, x=x0+w*u, y=y0+(y1-y0)*u, si=Math.sin(PI*u);
+  if(type==='rainbow') return [x, y-A*si];
+  if(type==='swing')   return [x, y+A*.75*si];
+  if(type==='wave')    return [x, y-A*.55*Math.sin(2*PI*u)];
+  if(type==='zigzag'){ const k=2*u, f=k-Math.floor(k); return [x, y-A*.6*(1-Math.abs(2*f-1))]; }
+  if(type==='circle'){ const a=2*PI*u, r=R*1.25; return [x+sg*r*Math.sin(a), y-up*r*(1-Math.cos(a))]; }
+  const S=R*3, [px,py]=polyAt(POLY[type],u);
+  return [x+sg*px*S, y+up*py*S];
+}
+
+/* ===================== 樂曲 ===================== */
+const M={G3:55,C4:60,D4:62,E4:64,F4:65,G4:67,A4:69};
+const C={blue:'#5ab4ff',orange:'#ffad42',green:'#4dffb0',purple:'#c48cff',red:'#ff5d7a'};
+const q=(...a)=>a.map(m=>[m,1]);
+const CH={C:[48,52,55],F:[41,45,48],G:[43,47,50],Bm:[47,50,54],'F#':[42,46,49],D:[50,54,57],Cb:[48,52,55]};
+const tw1=[...q(M.C4,M.C4,M.G4,M.G4,M.A4,M.A4),[M.G4,2]];
+const tw2=[...q(M.F4,M.F4,M.E4,M.E4,M.D4,M.D4),[M.C4,2]];
+const tw3=[...q(M.G4,M.G4,M.F4,M.F4,M.E4,M.E4),[M.D4,2]];
+const od1=q(M.E4,M.E4,M.F4,M.G4,M.G4,M.F4,M.E4,M.D4);
+const od2=[...q(M.C4,M.C4,M.D4,M.E4),[M.E4,1.5],[M.D4,.5],[M.D4,2]];
+const od2b=[...q(M.C4,M.C4,M.D4,M.E4),[M.D4,1.5],[M.C4,.5],[M.C4,2]];
+const odB=[[M.D4,1],[M.D4,1],[M.E4,1],[M.C4,1],[M.D4,1],[M.E4,.5],[M.F4,.5],[M.E4,1],[M.C4,1],
+           [M.D4,1],[M.E4,.5],[M.F4,.5],[M.E4,1],[M.D4,1],[M.C4,1],[M.D4,1],[M.G3,2]];
+const mk=[[59,.5],[61,.5],[62,.5],[64,.5],[66,.5],[62,.5],[66,1],[65,.5],[61,.5],[65,1],[64,.5],[60,.5],[64,1],
+          [59,.5],[61,.5],[62,.5],[64,.5],[66,.5],[62,.5],[66,.5],[71,.5],[69,.5],[66,.5],[62,.5],[66,.5],[69,2]];
+
+/* ---------- 更多曲子 ---------- */
+const N={G3:55,A3:57,B3:59,C4:60,D4:62,E4:64,F4:65,G4:67,A4:69,B4:71,C5:72};
+const tiger=[...q(N.C4,N.D4,N.E4,N.C4,N.C4,N.D4,N.E4,N.C4)];
+const tiger2=[...q(N.E4,N.F4),[N.G4,2],...q(N.E4,N.F4),[N.G4,2]];
+const tiger3=[[N.G4,.5],[N.A4,.5],[N.G4,.5],[N.F4,.5],[N.E4,1],[N.C4,1],[N.G4,.5],[N.A4,.5],[N.G4,.5],[N.F4,.5],[N.E4,1],[N.C4,1]];
+const tiger4=[[N.C4,1],[N.G3,1],[N.C4,2],[N.C4,1],[N.G3,1],[N.C4,2]];
+const bee1=[[N.G4,1],[N.E4,1],[N.E4,2],[N.F4,1],[N.D4,1],[N.D4,2],...q(N.C4,N.D4,N.E4,N.F4),[N.G4,1],[N.G4,1],[N.G4,2]];
+const bee2=[[N.G4,1],[N.E4,1],[N.E4,2],[N.F4,1],[N.D4,1],[N.D4,2],...q(N.C4,N.E4,N.G4,N.G4),[N.E4,4]];
+const beeB=[...q(N.D4,N.D4,N.D4,N.D4,N.D4,N.E4),[N.F4,2],...q(N.E4,N.E4,N.E4,N.E4,N.E4,N.F4),[N.G4,2]];
+const bee3=[[N.G4,1],[N.E4,1],[N.E4,2],[N.F4,1],[N.D4,1],[N.D4,2],...q(N.C4,N.E4,N.G4,N.G4),[N.C4,4]];
+const lamb1=[...q(N.E4,N.D4,N.C4,N.D4,N.E4,N.E4),[N.E4,2],...q(N.D4,N.D4),[N.D4,2],...q(N.E4,N.G4),[N.G4,2]];
+const lamb2=[...q(N.E4,N.D4,N.C4,N.D4,N.E4,N.E4,N.E4,N.E4,N.D4,N.D4,N.E4,N.D4),[N.C4,4]];
+const lb1=[[N.G4,1.5],[N.A4,.5],[N.G4,1],[N.F4,1],...q(N.E4,N.F4),[N.G4,2],...q(N.D4,N.E4),[N.F4,2],...q(N.E4,N.F4),[N.G4,2]];
+const lb2=[[N.G4,1.5],[N.A4,.5],[N.G4,1],[N.F4,1],...q(N.E4,N.F4),[N.G4,2],[N.D4,2],[N.G4,2],[N.E4,1],[N.C4,3]];
+const hay=[...q(N.C4,N.C4,N.E4,N.E4,N.G4,N.G4),[N.E4,2],...q(N.F4,N.F4,N.D4,N.D4,N.B3,N.B3),[N.G3,2],
+           ...q(N.C4,N.C4,N.E4,N.E4,N.G4,N.G4),[N.C5,2],...q(N.E4,N.E4,N.D4,N.D4)];
+const home1=[[N.E4,1.5],[N.G4,.5],[N.G4,2],[N.E4,1.5],[N.D4,.5],[N.C4,2],...q(N.D4,N.E4,N.G4,N.E4),[N.D4,4]];
+const home2=[[N.E4,1.5],[N.G4,.5],[N.G4,2],[N.E4,1.5],[N.D4,.5],[N.C4,2],[N.D4,1],[N.E4,1],[N.D4,1.5],[N.C4,.5],[N.C4,4]];
+const C2={pink:'#ff7ad9',yellow:'#ffe066',cyan:'#5ef0ff',lime:'#b6ff5c'};
+const SOFT={mel:['flute'],pad:true,bass:'arco'}, MID={mel:['vln'],pad:true,bass:'pizz'}, BIG={mel:['vln','flute'],pad:true,bass:'arco',brass:true,timp:'slot',cym:true};
+const MORE=[
+  {id:'tiger',name:'兩隻老虎',sub:'兒歌｜每句唱兩次',bpm:96,legato:.85,color:C2.yellow,icon:'rainbow',
+   task:'兩隻老虎每一句都唱兩次，所以每個動作也做兩次！第三句有很多快快的音，要畫波浪〰️。',
+   sections:[
+    {label:'1',name:'兩隻老虎',color:C2.yellow,vel:[.5,.5],ch:'C C C C',orc:SOFT,notes:tiger},
+    {label:'2',name:'跑得快',color:C.orange,vel:[.55,.55],ch:'C C C C',orc:SOFT,notes:tiger2},
+    {label:'3',name:'一隻沒有耳朵',color:C2.pink,vel:[.6,.6],ch:'C C C C',orc:MID,notes:tiger3},
+    {label:'4',name:'真奇怪',color:C2.cyan,vel:[.6,.6],ch:'C G C G',orc:MID,notes:tiger4},
+    {label:'1',name:'再唱一次・大聲',color:C2.yellow,vel:[.85,.85],ch:'C C C C',orc:BIG,notes:tiger},
+    {label:'2',name:'跑得快',color:C.orange,vel:[.88,.88],ch:'C C C C',orc:BIG,notes:tiger2},
+    {label:'3',name:'一隻沒有尾巴',color:C2.pink,vel:[.9,.9],ch:'C C C C',orc:BIG,notes:tiger3},
+    {label:'4',name:'真奇怪',color:C2.cyan,vel:[.95,1],ch:'C G C G',orc:BIG,notes:tiger4}]},
+  {id:'bee',name:'小蜜蜂',sub:'兒歌｜A–A′–B–A′',bpm:100,legato:.88,color:C2.yellow,icon:'swing',
+   task:'「嗡嗡嗡」一開始就往下盪鞦韆！B 段的「大家一起勤做工」有很多一樣的音，要原地彩虹跳跳跳。',
+   sections:[
+    {label:'A',name:'嗡嗡嗡',color:C2.yellow,vel:[.55,.55],ch:'C C G G C C G G',orc:SOFT,notes:bee1},
+    {label:'A′',name:'飛到西',color:C2.yellow,vel:[.55,.55],ch:'C C G G C C C C',orc:SOFT,notes:bee2},
+    {label:'B',name:'大家一起勤做工',color:C2.lime,vel:[.6,.85],ch:'G G G G C C C C',orc:MID,notes:beeB},
+    {label:'A′',name:'嗡嗡嗡',color:C2.yellow,vel:[.9,.9],ch:'C C G G C C C C',orc:BIG,notes:bee3}]},
+  {id:'lamb',name:'瑪莉有隻小綿羊',sub:'兒歌｜很好跟',bpm:104,legato:.88,color:C2.pink,icon:'swing',
+   task:'第一句「瑪莉有隻」往下盪，再彩虹爬回來；2 拍的長音畫圓形，最後 4 拍的長音畫…星星⭐！第二遍會變大聲喔！',
+   sections:[
+    {label:'A',name:'瑪莉有隻小綿羊',color:C2.pink,vel:[.5,.5],ch:'C C C C G G C C',orc:SOFT,notes:lamb1},
+    {label:'A′',name:'羊毛白又白',color:C2.pink,vel:[.55,.55],ch:'C C C C G G C C',orc:SOFT,notes:lamb2},
+    {label:'A',name:'再一次・大聲',color:C.blue,vel:[.85,.85],ch:'C C C C G G C C',orc:BIG,notes:lamb1},
+    {label:'A′',name:'羊毛白又白',color:C.blue,vel:[.9,.95],ch:'C C C C G G C C',orc:BIG,notes:lamb2}]},
+  {id:'bridge',name:'倫敦鐵橋',sub:'兒歌｜有波浪',bpm:100,legato:.85,color:C2.cyan,icon:'wave',
+   task:'「倫敦鐵橋」第一拍有長短兩個音，要畫波浪〰️！「垮下來」的最後一個音有 3 拍，要畫三角形！',
+   sections:[
+    {label:'A',name:'倫敦鐵橋垮下來',color:C2.cyan,vel:[.55,.55],ch:'C C C C G G C C',orc:SOFT,notes:lb1},
+    {label:'A′',name:'就要垮下來',color:C2.cyan,vel:[.6,.6],ch:'C C C C G G C C',orc:MID,notes:lb2},
+    {label:'A',name:'再一次・大聲',color:C.green,vel:[.85,.85],ch:'C C C C G G C C',orc:BIG,notes:lb1},
+    {label:'A′',name:'就要垮下來',color:C.green,vel:[.9,1],ch:'C C C C G G C C',orc:BIG,notes:lb2}]},
+  {id:'surprise',name:'驚愕交響曲',sub:'海頓｜小聲、更小聲…嚇一跳！',bpm:96,legato:.7,color:C2.lime,icon:'circle',
+   task:'海頓故意讓音樂越來越小聲，觀眾都快睡著了……突然「碰！」一聲。準備好畫一顆超～大的星星⭐！',
+   sections:[
+    {label:'A',name:'輕輕的',color:C2.lime,vel:[.38,.38],ch:'C C C C G G G G C C C C G G C C',orc:{mel:['vln'],bass:'pizz'},notes:[...hay,[N.C4,4]]},
+    {label:'A',name:'更輕更輕…',color:C.blue,vel:[.15,.12],ch:'C C C C G G G G C C C C G G C',orc:{mel:['vln'],bass:'pizz'},notes:[...hay,[N.C4,2]]},
+    {label:'!',accent:true,name:'碰！嚇一跳',color:C.red,vel:[1,1],ch:'G',orc:{mel:['vln','horn'],pad:true,bass:'arco',brass:true,timp:'beat',cym:true},notes:[[N.G4,2]]},
+    {label:'B',name:'大聲的主題',color:C.orange,vel:[.8,.85],ch:'C C C C G G G G C C C C G G C C',orc:{mel:['vln','flute'],pad:true,bass:'arco',brass:true,timp:'slot'},notes:[...hay,[N.C4,4]]}]},
+  {id:'home',name:'念故鄉',sub:'德弗札克《新世界》｜慢慢的',bpm:66,legato:.95,color:C2.cyan,icon:'circle',
+   task:'這首很慢、很溫柔，長長的音很多，要慢慢畫正方形（4 拍）。聽聽看，第二次是哪個樂器在吹？',
+   sections:[
+    {label:'A',name:'想家的歌',color:C2.cyan,vel:[.45,.55],ch:'C C C C G G G G',orc:{mel:['horn'],pad:true,bass:'arco'},notes:home1},
+    {label:'A′',name:'回家了',color:C2.cyan,vel:[.55,.45],ch:'C C C C G G C C',orc:{mel:['horn'],pad:true,bass:'arco'},notes:home2},
+    {label:'A',name:'長笛來唱',color:C.purple,vel:[.5,.65],ch:'C C C C G G G G',orc:{mel:['flute'],pad:true,bass:'arco'},notes:home1},
+    {label:'A′',name:'慢慢結束',color:C.purple,vel:[.6,.35],ch:'C C C C G G C C',orc:{mel:['flute','vln'],pad:true,bass:'arco'},notes:home2}]},
+];
+
+const TRACKS0=[
+  {id:'twinkle',name:'小星星',sub:'兒歌｜最簡單・A–B–A',bpm:88,legato:.9,color:C.blue,icon:'rainbow',
+   task:'跟著光圈畫彩虹🌈！音往下就盪鞦韆，長長的「晶～」有 2 拍，要畫圓形；最後一個音畫星星⭐。B 段換成橘色，你聽出不一樣了嗎？',
+   sections:[
+    {label:'A',name:'主題',color:C.blue,orc:{mel:['flute'],pad:true,bass:'arco'},vel:[.55,.55],ch:'C C F C F C G C',notes:[...tw1,...tw2]},
+    {label:'B',name:'新的一段',color:C.orange,orc:{mel:['vln'],bass:'pizz'},vel:[.5,.8],ch:'C F C G C F C G',notes:[...tw3,...tw3]},
+    {label:'A',name:'主題回來',color:C.blue,orc:{mel:['vln','flute'],pad:true,bass:'arco',brass:true,timp:'slot',cym:true},vel:[.9,.9],ch:'C C F C F C G C',notes:[...tw1,...tw2]}]},
+  {id:'ode',name:'歡樂頌',sub:'貝多芬｜A–A′–B–A′',bpm:100,legato:.92,color:C.green,icon:'wave',
+   task:'仔細聽，哪裡一拍有兩個音？那裡要畫波浪〰️。長音要畫圓形，最後一個音畫星星⭐。',
+   sections:[
+    {label:'A',name:'主題',color:C.green,orc:{mel:['vln'],pad:true,bass:'arco'},vel:[.6,.6],ch:'C C G G C C G G',notes:[...od1,...od2]},
+    {label:'A′',name:'主題再一次',color:C.green,orc:{mel:['vln','flute'],pad:true,bass:'arco'},vel:[.6,.6],ch:'C C G G C C G C',notes:[...od1,...od2b]},
+    {label:'B',name:'不一樣的一段',color:C.orange,orc:{mel:['flute'],bass:'pizz'},vel:[.45,.8],ch:'G C G C G C G G',notes:odB},
+    {label:'A′',name:'大聲回來',color:C.green,orc:{mel:['vln','horn'],pad:true,bass:'arco',brass:true,timp:'slot',cym:true},vel:[.95,.95],ch:'C C G G C C G C',notes:[...od1,...od2b]}]},
+  {id:'mountain',name:'山魔王的大廳',sub:'葛利格｜越來越大聲、越快',bpm:100,legato:.5,color:C.purple,icon:'wave',
+   task:'山魔王來了！同一段音樂出現 4 次，光圈越來越大、越來越快。最後一下畫星星⭐！',
+   sections:[
+    {label:'1',orc:{mel:['bsn'],bass:'pizz'},ch:'Bm Bm F# C Bm Bm D D',name:'第 1 次・偷偷的',color:C.purple,vel:[.25,.32],tempo:1,notes:mk},
+    {label:'2',orc:{mel:['bsn','pvln'],bass:'pizz'},ch:'Bm Bm F# C Bm Bm D D',name:'第 2 次',color:C.purple,vel:[.42,.52],tempo:1.1,notes:mk},
+    {label:'3',orc:{mel:['vln','bsn'],bass:'pizz',brass:true,timp:'slot'},ch:'Bm Bm F# C Bm Bm D D',name:'第 3 次',color:C.purple,vel:[.6,.75],tempo:1.2,notes:mk},
+    {label:'4',orc:{mel:['vln','horn','bsn'],bass:'pizz',brass:true,timp:'beat',cym:true},ch:'Bm Bm F# C Bm Bm D D',name:'第 4 次・最大聲',color:C.purple,vel:[.82,1],tempo:1.3,notes:mk},
+    {label:'尾',orc:{mel:['vln','horn'],pad:true,bass:'arco',brass:true,timp:'beat',cym:true},name:'結尾',color:C.red,vel:[1,1],ch:'Bm Bm',tempo:1.2,legato:1,notes:[[71,.5],[59,.5],[71,1],[71,2]]}]},
+];
+const byId=Object.fromEntries([...TRACKS0,...MORE].map(t=>[t.id,t]));
+const TRACKS=['twinkle','tiger','bee','lamb','bridge','ode','surprise','home','mountain'].map(k=>byId[k]);
+
+
+/* ===================== 狀態 ===================== */
+let pulses=[];
+let track=TRACKS[0], events=[], beats=[], secs=[], total=0, lo=55, hi=72;
+let preview=true, guide=true, speed=.8, state='idle';
+let ctx=null, master=null, playGain=null, playStart=0, now=-1;
+let ptr={x:0,y:0,active:false,type:'mouse',inside:false};
+let trail=[], hitT=0, totT=0, parts=[];
+
+function build(){
+  events=[]; beats=[]; pulses=[]; secs=[]; let t=0;
+  track.sections.forEach((s,si)=>{
+    const spb=60/(track.bpm*(s.tempo||1));
+    const nb=Math.round(s.notes.reduce((a,n)=>a+n[1],0));
+    let b=0; const ns=s.notes.map(([m,d])=>{const o={m,b0:b,b1:b+d}; b+=d; return o;});
+    const L=s.legato||track.legato, O=s.orc||{}, velAt=bb=>s.vel[0]+(s.vel[1]-s.vel[0])*(bb/nb);
+    ns.forEach(n=>events.push({k:'mel',orc:O.mel,stac:L<.7,t0:t+n.b0*spb,sound:(n.b1-n.b0)*spb*L,midi:n.m,vel:velAt(n.b0)}));
+    if(O.cym) events.push({k:'cym',t0:t,sound:2,vel:velAt(0)});
+    if(s.ch) s.ch.split(' ').forEach((name,ci)=>{
+      const c=CH[name], b0=ci*2; if(b0>=nb) return;
+      const T=t+b0*spb, D=Math.min(2,nb-b0)*spb, v=velAt(b0);
+      const low=c[0]-12>=35?c[0]-12:c[0];
+      if(O.pad)  events.push({k:'pad',t0:T,sound:D*1.02,notes:[c[1],c[2],c[0]+12],vel:v});
+      if(O.bass==='arco') events.push({k:'bass',t0:T,sound:D*1.02,midi:low,vel:v});
+      if(O.bass==='pizz') [[low,0],[low+7,1]].forEach(([m,o])=>{ if(b0+o<nb) events.push({k:'pizzB',t0:T+o*spb,sound:.3,midi:m,vel:.35+.5*v}); });
+      if(O.brass) events.push({k:'brass',t0:T,sound:D*(L<.7?.5:.95),notes:c.map(n=>{while(n<50)n+=12;return n;}),vel:v});
+      if(O.timp){ let r=c[0]; while(r>52)r-=12; while(r<40)r+=12;
+        const hits=O.timp==='beat'?[0,1]:[0]; hits.forEach(o=>{ if(b0+o<nb) events.push({k:'timp',t0:T+o*spb,sound:1,midi:r,vel:.4+.6*v}); }); }
+    });
+    if(s.ch){ s.ch.split(' ').forEach((name,ci)=>{
+      const c=CH[name], b0=ci*2, vv=.18+.35*(s.vel[0]+(s.vel[1]-s.vel[0])*(b0/nb));
+      if(b0>=nb) return;
+      const pat = track.legato<.7
+        ? [[c[0]-12,0,.4],[c[2]-12,1,.4]]                                    // 撥弦低音
+        : [[c[0],0,.5],[c[2],.5,.5],[c[1],1,.5],[c[2],1.5,.5]];               // 阿爾貝蒂分解和弦
+      pat.forEach(([m,o,d])=>{ if(b0+o<nb) events.push({k:'acc',t0:t+(b0+o)*spb,sound:d*spb*(track.legato<.7?.6:1.6),midi:m,vel:vv*(o===0?1.15:.85),acc:true}); });
+    }); }
+    const sounding=bb=>{ for(const n of ns) if(n.b0<=bb+1e-6 && bb<n.b1-1e-6) return n; return ns[ns.length-1]; };
+    const lastSec=si===track.sections.length-1, cover=new Array(nb).fill(null);
+    ns.forEach((n,ni)=>{
+      const len=n.b1-n.b0;
+      if(len>=2-1e-6 && Math.abs(n.b0-Math.round(n.b0))<1e-6){
+        const type=(lastSec&&ni===ns.length-1)||s.accent?'star':len>=4-1e-6?'square':len>=3-1e-6?'triangle':'circle';
+        const span=type==='square'?4:type==='triangle'?3:Math.round(len);
+        const u={type,k0:Math.round(n.b0),n:Math.min(span,nb-Math.round(n.b0))};
+        for(let k=u.k0;k<u.k0+u.n;k++) cover[k]=u;
+      }
+    });
+    for(let k=0;k<nb;k++){
+      pulses.push({t0:t+k*spb,t1:t+(k+1)*spb,beatInBar:k%4});
+      const vel=s.vel[0]+(s.vel[1]-s.vel[0])*(k/nb), base={si,sec:s,color:s.color,vel,k,beatInBar:k%4,hit:0,tot:0,m0:sounding(k).m};
+      if(cover[k]){ if(cover[k].k0===k) beats.push({...base,t0:t+k*spb,t1:t+(k+cover[k].n)*spb,type:cover[k].type,n:cover[k].n}); continue; }
+      const on=ns.filter(n=>n.b0>=k-1e-6 && n.b0<k+1-1e-6);
+      const mid=!on.length||on[0].b0>k+1e-6, cnt=on.length+(mid&&on.length?1:0);
+      const even= !mid && on.length===2 && Math.abs(on[1].b0-on[0].b0-.5)<1e-6 || on.length>=3;
+      beats.push({...base,t0:t+k*spb,t1:t+(k+1)*spb,n:1,kind:on.length===0?'held':cnt===1?'one':'multi',even});
+    }
+    secs.push({...s,hit:0,tot:0}); t+=nb*spb;
+  });
+  total=t; events.sort((a,b)=>a.t0-b.t0);
+  beats.forEach((b,i)=>{
+    const nx=beats[i+1]; b.idx=i;
+    if(b.type){ b.m1=b.m0; return; }
+    b.m1=b.kind==='held'?b.m0:(nx?nx.m0:b.m0);
+    b.type = b.kind==='held'?'circle' : b.kind==='multi'?(b.even?'zigzag':'wave') : (b.m1<b.m0?'swing':'rainbow');
+  });
+  const ms=events.filter(e=>e.k==='mel').map(e=>e.midi); lo=Math.min(...ms); hi=Math.max(...ms);
+  layoutBars();
+}
+let allowVert=true;
+function layoutBars(){
+  // 每一小節一個方向：旋律往上→斜上，往下→斜下，持平→水平（或往中間斜），左右來回
+  const DIRS={'0,-1':['↑','下到上（直立）'],'0,1':['↓','上到下（直立）'],'1,0':['→','左到右'],'-1,0':['←','右到左'],'1,1':['↘','左上到右下'],'-1,1':['↙','右上到左下'],'1,-1':['↗','左下到右上'],'-1,-1':['↖','右下到左上']};
+  let px=.16, py=.62, i=0, vN=0;
+  while(i<beats.length){
+    let j=i; while(j+1<beats.length && beats[j+1].si===beats[i].si && Math.floor(beats[j+1].k/4)===Math.floor(beats[i].k/4)) j++;
+    const bar=beats.slice(i,j+1), contour=bar[bar.length-1].m1-bar[0].m0;
+    const wsum=bar.reduce((a,b)=>a+(CLOSED.has(b.type)?0:1),0); let dx=px<.5?1:-1, spanX=.66*wsum/4, spanY=.24*wsum/4;
+    if(px+dx*spanX>.88||px+dx*spanX<.12){ dx=-dx; if(px+dx*spanX>.88||px+dx*spanX<.12) spanX=Math.max(0,dx>0?.88-px:px-.12); }
+    let dy= contour>=2?-1 : contour<=-2?1 : (py<.4?1:py>.7?-1:0);
+    if(py+dy*spanY<.3||py+dy*spanY>.84) dy= dy? 0 : 0;
+    if(dy===0 && contour===0 && bar.length>=3) dy = py<.57?1:-1;
+    if(py+dy*spanY<.3||py+dy*spanY>.84) dy=0;
+    // 往上／往下的小節，每隔一次改成「直立」走，圓弧往左右彎
+    let vert=false;
+    if(Math.abs(contour)>=2 && wsum>=3 && (vN++)%(allowVert?2:3)===(allowVert?1:2)){
+      const vd=contour>0?-1:1, room=vd<0?py-.24:.9-py, vs=Math.min(.62*wsum/3,room);
+      if(vs>=.34){ vert=true; dx=0; spanX=0; dy=vd; spanY=vs; }
+    }
+    const side=px<.5?1:-1;
+    const wts=bar.map(b=>CLOSED.has(b.type)?0:1), tot=wts.reduce((a,c)=>a+c,0)||1;
+    let acc=0;
+    bar.forEach((b,n)=>{
+      const f0=acc/tot; acc+=wts[n]; const f1=acc/tot;
+      b.ax0=px+dx*spanX*f0; b.ax1=px+dx*spanX*f1; b.ay0=py+dy*spanY*f0; b.ay1=py+dy*spanY*f1;
+      b.dirLabel=DIRS[dx+','+dy]; b.barStart=n===0; b.dirX=dx||side; b.up=b.ay0<.5?-1:1; b.vert=vert; b.side=side;
+    });
+    px+=dx*spanX; py+=dy*spanY; i=j+1;
+  }}
+
+
+/* ===================== 聲音引擎（交響樂團／鋼琴／音樂盒＋殘響） ===================== */
+let inst='orch', accOn=true, schedIdx=0, schedTimer=null, noiseBuf=null, longNoise=null, wetG=null;
+function ensureAudio(){
+  if(ctx) return;
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const comp=ctx.createDynamicsCompressor(); comp.threshold.value=-18; comp.ratio.value=3; comp.attack.value=.006; comp.release.value=.2;
+  master=ctx.createGain(); master.gain.value=.72;
+  const conv=ctx.createConvolver(), len=ctx.sampleRate*3.2, ir=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let ch=0;ch<2;ch++){ const d=ir.getChannelData(ch); for(let i=0;i<len;i++){ const t=i/ctx.sampleRate; d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.4)*(t<.02?t/.02:1); } }
+  conv.buffer=ir;
+  wetG=ctx.createGain(); wetG.gain.value=inst==='orch'?.5:.32;
+  const pre=ctx.createBiquadFilter(); pre.type='lowpass'; pre.frequency.value=4800;
+  master.connect(comp); master.connect(pre).connect(conv).connect(wetG).connect(comp);
+  const lim=ctx.createDynamicsCompressor(); lim.threshold.value=-4; lim.knee.value=2; lim.ratio.value=20; lim.attack.value=.001; lim.release.value=.1;
+  comp.connect(lim).connect(ctx.destination);
+  noiseBuf=ctx.createBuffer(1,ctx.sampleRate*.05,ctx.sampleRate);
+  let nd=noiseBuf.getChannelData(0); for(let i=0;i<nd.length;i++) nd[i]=(Math.random()*2-1)*Math.pow(1-i/nd.length,3);
+  longNoise=ctx.createBuffer(1,ctx.sampleRate*3,ctx.sampleRate);
+  nd=longNoise.getChannelData(0); for(let i=0;i<nd.length;i++) nd[i]=Math.random()*2-1;
+}
+const hz=m=>440*Math.pow(2,(m-69)/12);
+function outNode(dest,pan){ const o=ctx.createGain(); if(ctx.createStereoPanner){ const p=ctx.createStereoPanner(); p.pan.value=pan||0; o.connect(p).connect(dest);} else o.connect(dest); return o; }
+function hold(g,when,a,att,dur,rel){ const s=when+Math.max(att,dur); g.gain.setValueAtTime(0,when); g.gain.linearRampToValueAtTime(a,when+att); g.gain.setValueAtTime(a,s); g.gain.setTargetAtTime(0,s,rel); return s+rel*6; }
+function vibrato(when,f,depth){ const l=ctx.createOscillator(), lg=ctx.createGain(); l.frequency.value=5+Math.random()*.8; lg.gain.setValueAtTime(0,when); lg.gain.linearRampToValueAtTime(depth,when+.35); l.connect(lg); l.start(when); return {node:lg,osc:l}; }
+
+/* 弦樂群：多把琴同時拉，音高略有不同，聽起來比較厚 */
+function strings(when,dur,m,v,dest,o){
+  const f=hz(m), out=outNode(dest,o.pan), g=ctx.createGain(), lp=ctx.createBiquadFilter(), hp=ctx.createBiquadFilter();
+  lp.type='lowpass'; lp.frequency.value=o.lp; lp.Q.value=.5; hp.type='highpass'; hp.frequency.value=o.hp||80;
+  g.connect(hp).connect(lp).connect(out);
+  const end=hold(g,when,(.05+.17*v)*(o.gain||1),o.att,dur,o.rel);
+  const vb=vibrato(when,f,o.vib??9);
+  const det=[-11,-4,3,9,14].slice(0,o.n||4);
+  det.forEach(d=>{ const x=ctx.createOscillator(); x.type='sawtooth'; x.frequency.value=f; x.detune.value=d+(Math.random()-.5)*4;
+    vb.node.connect(x.detune); const vg=ctx.createGain(); vg.gain.value=1/det.length; x.connect(vg).connect(g); x.start(when); x.stop(end); });
+  vb.osc.stop(end);
+}
+function flute(when,dur,m,v,dest){
+  const f=hz(m), out=outNode(dest,.25), g=ctx.createGain(), lp=ctx.createBiquadFilter();
+  lp.type='lowpass'; lp.frequency.value=3200; g.connect(lp).connect(out);
+  const end=hold(g,when,.09+.18*v,.06,dur,.12), vb=vibrato(when,f,14);
+  [['sine',1,1],['triangle',2,.12],['sine',3,.05]].forEach(([t,k,a])=>{ const x=ctx.createOscillator(), xg=ctx.createGain(); x.type=t; x.frequency.value=f*k; xg.gain.value=a;
+    vb.node.connect(x.detune); x.connect(xg).connect(g); x.start(when); x.stop(end); });
+  const n=ctx.createBufferSource(), bp=ctx.createBiquadFilter(), ng=ctx.createGain(); n.buffer=longNoise; n.loop=true;
+  bp.type='bandpass'; bp.frequency.value=f*2; bp.Q.value=3; ng.gain.value=.05; n.connect(bp).connect(ng).connect(g); n.start(when); n.stop(end);
+  vb.osc.stop(end);
+}
+function horn(when,dur,m,v,dest,pan=-.05){
+  const f=hz(m), out=outNode(dest,pan), g=ctx.createGain(), lp=ctx.createBiquadFilter();
+  lp.type='lowpass'; lp.Q.value=1.2;
+  lp.frequency.setValueAtTime(250,when); lp.frequency.linearRampToValueAtTime(500+v*1800,when+.1); lp.frequency.setTargetAtTime(400+v*1000,when+.1,.3);
+  g.connect(lp).connect(out);
+  const end=hold(g,when,.05+.13*v,.07,dur,.2);
+  [-5,5].forEach(d=>{ const x=ctx.createOscillator(); x.type='sawtooth'; x.frequency.value=f; x.detune.value=d; x.connect(g); x.start(when); x.stop(end); });
+}
+function bassoon(when,dur,m,v,dest,stac){
+  const f=hz(m), out=outNode(dest,.1), g=ctx.createGain(), bp=ctx.createBiquadFilter(), lp=ctx.createBiquadFilter();
+  bp.type='bandpass'; bp.frequency.value=520; bp.Q.value=.9; lp.type='lowpass'; lp.frequency.value=1800;
+  g.connect(bp).connect(lp).connect(out);
+  const end=hold(g,when,.16+.3*v,stac?.015:.04,dur,stac?.05:.12);
+  [['sawtooth',0],['square',7]].forEach(([t,d])=>{ const x=ctx.createOscillator(); x.type=t; x.frequency.value=f; x.detune.value=d; x.connect(g); x.start(when); x.stop(end); });
+}
+function pizz(when,m,v,dest,pan){
+  const f=hz(m), out=outNode(dest,pan), g=ctx.createGain(), lp=ctx.createBiquadFilter();
+  lp.type='lowpass'; lp.frequency.setValueAtTime(800+f*4,when); lp.frequency.setTargetAtTime(f*1.5,when,.06);
+  g.connect(lp).connect(out);
+  const tau=Math.min(.35,.12+60/f*.6);
+  g.gain.setValueAtTime(0,when); g.gain.linearRampToValueAtTime(.12+.3*v,when+.004); g.gain.setTargetAtTime(0,when+.004,tau);
+  [['sawtooth',0],['triangle',-6]].forEach(([t,d])=>{ const x=ctx.createOscillator(); x.type=t; x.frequency.value=f; x.detune.value=d; x.connect(g); x.start(when); x.stop(when+tau*6); });
+}
+function timpani(when,m,v,dest){
+  const f=hz(m), out=outNode(dest,-.15), g=ctx.createGain();
+  g.connect(out);
+  const a=.3+.45*v;
+  [[1,1,.6],[1.5,.35,.35],[2,.18,.25]].forEach(([k,amp,tau])=>{ const x=ctx.createOscillator(), xg=ctx.createGain(); x.frequency.setValueAtTime(f*k*1.06,when); x.frequency.exponentialRampToValueAtTime(f*k,when+.06);
+    xg.gain.setValueAtTime(a*amp,when); xg.gain.setTargetAtTime(0,when,tau); x.connect(xg).connect(g); x.start(when); x.stop(when+tau*7); });
+  const n=ctx.createBufferSource(), lp=ctx.createBiquadFilter(), ng=ctx.createGain(); n.buffer=noiseBuf; lp.type='lowpass'; lp.frequency.value=500; ng.gain.value=.5*v;
+  n.connect(lp).connect(ng).connect(g); n.start(when);
+}
+function cymbal(when,v,dest){
+  const out=outNode(dest,.3), n=ctx.createBufferSource(), hp=ctx.createBiquadFilter(), g=ctx.createGain();
+  n.buffer=longNoise; hp.type='highpass'; hp.frequency.value=5500;
+  g.gain.setValueAtTime(.16*v,when); g.gain.setTargetAtTime(0,when+.02,.7);
+  n.connect(hp).connect(g).connect(out); n.start(when); n.stop(when+3);
+}
+const ORCH={
+  vln:(w,d,m,v,e)=>strings(w,d,m,v,playGain,{att:e.stac?.015:.07,rel:e.stac?.06:.25,n:4,lp:1600+v*3600,hp:220,pan:-.2,vib:e.stac?0:10}),
+  flute:(w,d,m,v)=>flute(w,d,m+12,v,playGain),
+  horn:(w,d,m,v)=>horn(w,d,m,v*.9,playGain,.05),
+  bsn:(w,d,m,v,e)=>bassoon(w,d,m-12,v,playGain,e.stac),
+  pvln:(w,d,m,v)=>pizz(w,m+12,v*.8,playGain,-.3),
+};
+function playNote(when,e){
+  const orch=inst==='orch', d=e.sound/speed;
+  if(e.k==='mel'){
+    const v=Math.max(.05,Math.min(1,e.vel+(Math.random()-.5)*.06)), w=when+(Math.random()-.5)*.01;
+    if(orch) (e.orc||['vln']).forEach(n=>ORCH[n](w,d,e.midi,v,e));
+    else (inst==='piano'?piano:musicbox)(w,d,e.midi,v,playGain,.12);
+    return;
+  }
+  if(!accOn) return;
+  if(e.k==='acc'){ if(!orch) (inst==='piano'?piano:musicbox)(when,d,e.midi,e.vel,playGain,-.18); return; }
+  if(!orch) return;
+  const v=e.vel;
+  if(e.k==='pad')   e.notes.forEach((n,i)=>strings(when,d,n,v*.55,playGain,{att:.3,rel:.45,n:3,lp:900+v*1600,hp:120,pan:i%2?.25:-.05,gain:.8}));
+  if(e.k==='bass')  strings(when,d,e.midi,v*.75,playGain,{att:.12,rel:.4,n:3,lp:700,hp:25,pan:.2,vib:5});
+  if(e.k==='brass') e.notes.forEach((n,i)=>horn(when,d,n,v*.55,playGain,.1+i*.05));
+  if(e.k==='pizzB') pizz(when,e.midi,v,playGain,.2);
+  if(e.k==='timp')  timpani(when,e.midi,v,playGain);
+  if(e.k==='cym')   cymbal(when,v,playGain);
+}
+
+function panner(x){ const p=ctx.createStereoPanner?ctx.createStereoPanner():null; if(p){ p.pan.value=x; } return p; }
+function piano(when,dur,midi,vel,dest,pan=0){
+  const f=440*Math.pow(2,(midi-69)/12), out=ctx.createGain(), p=panner(pan);
+  out.gain.value=1; p?out.connect(p).connect(dest):out.connect(dest);
+  const base=2.8*Math.sqrt(262/f), bright=.6-.32*vel, off=when+dur;
+  for(let n=1;n<=8;n++){
+    const fn=f*n*Math.sqrt(1+.00035*n*n); if(fn>12000) break;
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.frequency.value=fn*(1+(Math.random()-.5)*.0008); o.type='sine';
+    const a=(.16+vel*.32)*Math.pow(n,-1.15)*Math.exp(-(n-1)*bright)*(n===2?1.25:1);
+    g.gain.setValueAtTime(0,when); g.gain.linearRampToValueAtTime(a,when+.004);
+    g.gain.setTargetAtTime(0,when+.004,base/(1+n*.45));
+    g.gain.setTargetAtTime(0,off,.09);
+    o.connect(g).connect(out); o.start(when); o.stop(off+.6);
+  }
+  // 琴槌敲擊聲
+  const ns=ctx.createBufferSource(), bp=ctx.createBiquadFilter(), ng=ctx.createGain();
+  ns.buffer=noiseBuf; bp.type='bandpass'; bp.frequency.value=Math.min(6000,f*4); bp.Q.value=1.2; ng.gain.value=.05+vel*.08;
+  ns.connect(bp).connect(ng).connect(out); ns.start(when);
+}
+function musicbox(when,dur,midi,vel,dest,pan=0){
+  const f=440*Math.pow(2,(midi+12-69)/12), out=ctx.createGain(), p=panner(pan);
+  p?out.connect(p).connect(dest):out.connect(dest);
+  const c=ctx.createOscillator(), m=ctx.createOscillator(), mg=ctx.createGain(), g=ctx.createGain();
+  c.frequency.value=f; m.frequency.value=f*3.5;
+  mg.gain.setValueAtTime(f*(1.2+vel*1.5),when); mg.gain.setTargetAtTime(0,when,.12);
+  m.connect(mg).connect(c.frequency);
+  const a=.1+vel*.22, tau=Math.min(1.4,.9*Math.sqrt(523/f)+.2);
+  g.gain.setValueAtTime(0,when); g.gain.linearRampToValueAtTime(a,when+.003); g.gain.setTargetAtTime(0,when+.003,tau);
+  c.connect(g).connect(out);
+  const h=ctx.createOscillator(), hg=ctx.createGain(); h.frequency.value=f*5.4;
+  hg.gain.setValueAtTime(a*.18,when); hg.gain.setTargetAtTime(0,when,.05); h.connect(hg).connect(out);
+  [c,m,h].forEach(o=>{o.start(when); o.stop(when+tau*5);});
+}
+function tick(when){
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type='sine'; o.frequency.value=1318;
+  g.gain.setValueAtTime(.18,when); g.gain.exponentialRampToValueAtTime(.0001,when+.12);
+  o.connect(g).connect(playGain); o.start(when); o.stop(when+.15);
+}
+function schedule(){
+  if(!playGain||state!=='playing') return;
+  const horizon=ctx.currentTime+.3;
+  while(schedIdx<events.length && playStart+events[schedIdx].t0/speed<horizon){
+    const e=events[schedIdx++]; playNote(Math.max(ctx.currentTime,playStart+e.t0/speed),e);
+  }
+}
+function stopAudio(){
+  clearInterval(schedTimer);
+  if(playGain){ try{ playGain.gain.setTargetAtTime(0,ctx.currentTime,.03); const pg=playGain; setTimeout(()=>pg.disconnect(),300);}catch(e){} playGain=null; }
+}
+
+/* ===================== 控制 ===================== */
+const playBtn=document.getElementById('playBtn');
+const beatLen=()=>pulses[0].t1-pulses[0].t0;
+function start(){
+  ensureAudio(); if(ctx.state==='suspended') ctx.resume();
+  stopAudio(); resetScore();
+  playGain=ctx.createGain(); playGain.connect(master);
+  const cb=beatLen()/speed;
+  playStart=ctx.currentTime+.4+cb*4;
+  for(let i=4;i>=1;i--) tick(playStart-i*cb);
+  schedIdx=0; state='playing'; setUI(); schedule(); schedTimer=setInterval(schedule,40);
+}
+function pause(){ ctx.suspend(); state='paused'; setUI(); }
+function resume(){ ctx.resume(); state='playing'; setUI(); }
+function reset(){ stopAudio(); if(ctx&&ctx.state==='suspended') ctx.resume(); state='idle'; now=-1; resetScore(); hideResult(); setUI(); }
+function resetScore(){ trail=[]; hitT=0; totT=0; beats.forEach(b=>{b.hit=0;b.tot=0;}); secs.forEach(s=>{s.hit=0;s.tot=0;}); }
+playBtn.onclick=()=>{ if(state==='idle'||state==='done'){ hideResult(); start(); } else if(state==='playing') pause(); else resume(); };
+document.getElementById('resetBtn').onclick=reset;
+document.getElementById('againBtn').onclick=()=>{ hideResult(); start(); };
+function setUI(){
+  playBtn.textContent=state==='playing'?'⏸ 暫停':state==='paused'?'▶ 繼續':'▶ 開始';
+  document.getElementById('speed').disabled=(state==='playing'||state==='paused');
+}
+document.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); playBtn.click(); }});
+
+function glyphPts(type,slope=0,N=60){
+  const raw=[]; const cl=CLOSED.has(type); for(let i=0;i<=N;i++) raw.push(shapeAt(type,i/N,0,0,cl?0:-slope*.25,cl?0:1,.42,.32,1,1));
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; raw.forEach(([x,y])=>{x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);});
+  return {raw,x0,x1,y0,y1};
+}
+function fitPts(G,cx,cy,bw,bh){
+  const gw=G.x1-G.x0||1, gh=G.y1-G.y0||1, sc=Math.min(bw/gw,bh/gh);
+  return G.raw.map(([x,y])=>[cx+(x-(G.x0+G.x1)/2)*sc, cy+(y-(G.y0+G.y1)/2)*sc]);
+}
+function iconSVG(type,color,w=40,h=30){
+  const P=fitPts(glyphPts(type),w/2,h/2,w-8,h-8).map(p=>p.map(v=>v.toFixed(1)).join(' '));
+  return `<svg viewBox="0 0 ${w} ${h}" style="--c:${color}"><path d="M${P.join('L')}" stroke="${color}" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+const tracksEl=document.getElementById('tracks');
+function renderTracks(){
+  tracksEl.innerHTML='';
+  TRACKS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='track'+(t===track?' on':''); b.style.setProperty('--c',t.color);
+    b.innerHTML=iconSVG(t.icon,t.color)+`<div><b>${t.name}</b><span>${t.sub}</span></div>`;
+    b.onclick=()=>{ track=t; reset(); build(); renderTracks(); document.getElementById('taskTxt').textContent=t.task; };
+    tracksEl.appendChild(b);
+  });
+}
+document.getElementById('legend').innerHTML=Object.entries(GEST).map(([k,v])=>`<div class="lg">${iconSVG(k,'#ffc94d')}<div><b>${v.name}</b> <span>${v.tip}</span></div></div>`).join('')
+  +`<div class="lg"><svg viewBox="0 0 40 28"><circle cx="20" cy="14" r="5" fill="#ffc94d"/><circle cx="20" cy="14" r="11" stroke="#ffc94d" fill="none" stroke-width="2"/></svg><div><b>越大聲</b> <span>光圈越大</span></div></div>`;
+function segBind(id,fn){
+  const el=document.getElementById(id);
+  el.querySelectorAll('button').forEach(b=>b.onclick=()=>{ el.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); fn(b.dataset.v); });
+}
+segBind('modeSeg',v=>{preview=v==='on';});
+segBind('guideSeg',v=>{guide=v==='on';});
+segBind('instSeg',v=>{inst=v; if(wetG) wetG.gain.value=v==='orch'?.5:.32;});
+segBind('accSeg',v=>{accOn=v==='on';});
+const speedEl=document.getElementById('speed');
+speedEl.oninput=()=>{speed=+speedEl.value; document.getElementById('speedTxt').textContent=(+speed.toFixed(2))+'×';};
+const optBtn=document.getElementById('optBtn'), opts=document.getElementById('opts');
+optBtn.onclick=e=>{ e.stopPropagation(); const on=opts.classList.toggle('show'); optBtn.setAttribute('aria-expanded',on); };
+document.addEventListener('pointerdown',e=>{ if(opts.classList.contains('show') && !opts.contains(e.target) && e.target!==optBtn){ opts.classList.remove('show'); optBtn.setAttribute('aria-expanded','false'); } });
+document.getElementById('fsBtn').onclick=()=>{ try{ if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }catch(e){} };
+
+/* ===================== 畫布 ===================== */
+const cv=document.getElementById('cv'), g=cv.getContext('2d'), stage=document.getElementById('stage');
+const sc=document.getElementById('strip'), sg=sc.getContext('2d');
+let W=0,H=0,SW=0,SH=0, stars=[];
+function resize(){
+  const DPR=Math.min(window.devicePixelRatio||1,2);
+  let r=stage.getBoundingClientRect(); W=r.width; H=r.height; cv.width=W*DPR; cv.height=H*DPR; g.setTransform(DPR,0,0,DPR,0,0);
+  r=sc.parentElement.getBoundingClientRect(); SW=r.width-3; SH=r.height-3; sc.width=SW*DPR; sc.height=SH*DPR; sg.setTransform(DPR,0,0,DPR,0,0);
+  const av=H/W>=.45; if(av!==allowVert){ allowVert=av; if(beats.length) layoutBars(); }
+  stars=Array.from({length:Math.round(W*H/6000)},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+.2,p:Math.random()*6}));
+}
+new ResizeObserver(resize).observe(stage);
+new ResizeObserver(resize).observe(sc.parentElement);
+
+const Y=m=>H*.84-(m-lo)/Math.max(1,hi-lo)*H*.42;
+const gp=(b,u)=>{
+  if(b.vert && !CLOSED.has(b.type)){
+    const x0=b.ax0*W,y0=b.ay0*H,y1=b.ay1*H, L=Math.abs(y1-y0)||1, dir=Math.sign(y1-y0)||1;
+    const [lx,ly]=shapeAt(b.type,u,0,0,0,L,Math.min((.08+.11*b.vel)*Math.min(W,H)*1.15,L*.5),0,1,1);
+    return [x0-ly*b.side, y0+dir*lx];
+  }
+  const w=(b.ax1-b.ax0)*W; return shapeAt(b.type,u,b.ax0*W,b.ay0*H,b.ay1*H,w,(.08+.11*b.vel)*H,(.06+.06*b.vel)*H,Math.sign(w)||(b.dirX||1),b.up||1); };
+function hexA(hex,a){ const n=parseInt(hex.slice(1),16); return `rgba(${n>>16},${n>>8&255},${n&255},${a})`; }
+function path(c,b,u0,u1,f=gp){ c.beginPath(); for(let i=0;i<=80;i++){ const [x,y]=f(b,u0+(u1-u0)*i/80); i?c.lineTo(x,y):c.moveTo(x,y);} }
+function glow(c,b,u0,u1,color,w,alpha=1){
+  if(u1<=u0) return;
+  c.save(); c.globalCompositeOperation='lighter'; c.globalAlpha=alpha; c.lineCap='round'; c.lineJoin='round';
+  path(c,b,u0,u1);
+  c.shadowColor=color; c.shadowBlur=w*3; c.strokeStyle=hexA(color,.28); c.lineWidth=w*2.6; c.stroke();
+  c.shadowBlur=w*1.5; c.strokeStyle=color; c.lineWidth=w; c.stroke();
+  c.shadowBlur=0; c.strokeStyle='rgba(255,255,255,.92)'; c.lineWidth=Math.max(1.5,w*.32); c.stroke();
+  c.restore();
+}
+function magicRing(x,y,r,color,ts,alpha=1){
+  g.save(); g.globalCompositeOperation='lighter'; g.globalAlpha=alpha; g.translate(x,y);
+  const grd=g.createRadialGradient(0,0,0,0,0,r*2.2);
+  grd.addColorStop(0,'rgba(255,230,160,.55)'); grd.addColorStop(.4,hexA(color,.25)); grd.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle=grd; g.beginPath(); g.arc(0,0,r*2.2,0,7); g.fill();
+  g.shadowColor='#ffb347'; g.shadowBlur=14; g.strokeStyle='#ffc94d'; g.lineWidth=2.2;
+  g.save(); g.rotate(ts/700);
+  g.beginPath(); g.arc(0,0,r,0,7); g.stroke();
+  for(let i=0;i<12;i++){ const a=i*Math.PI/6; g.beginPath(); g.moveTo(Math.cos(a)*r*.82,Math.sin(a)*r*.82); g.lineTo(Math.cos(a)*r*1.12,Math.sin(a)*r*1.12); g.lineWidth=i%3?1.2:2.4; g.stroke(); }
+  g.restore();
+  g.save(); g.rotate(-ts/500); g.lineWidth=1.6; g.strokeStyle='#ff9f2e';
+  g.beginPath(); g.arc(0,0,r*.66,0,7); g.setLineDash([4,5]); g.stroke(); g.setLineDash([]);
+  g.beginPath(); for(let i=0;i<=6;i++){ const a=i*Math.PI*2/3*2; const px=Math.cos(a)*r*.55, py=Math.sin(a)*r*.55; i?g.lineTo(px,py):g.moveTo(px,py);} g.stroke();
+  g.restore();
+  g.shadowBlur=0; g.fillStyle='#fff'; g.beginPath(); g.arc(0,0,r*.2,0,7); g.fill();
+  g.restore();
+}
+const curPulse=()=>{ for(const p of pulses) if(now<p.t1) return p; return pulses[pulses.length-1]; };
+const beatAt=t=>{ if(t<0) return 0; for(let i=0;i<beats.length;i++) if(t<beats[i].t1) return i; return beats.length-1; };
+
+let lastTs=0;
+function draw(ts){
+  const dtR=Math.min(.05,(ts-lastTs)/1000||.016); lastTs=ts;
+  if(!W){ requestAnimationFrame(draw); return; }
+  if(state==='playing'||state==='paused'){
+    now=(ctx.currentTime-playStart)*speed;
+    if(now>total+.5&&state==='playing'){ state='done'; setUI(); showResult(); }
+  } else if(state==='idle') now=-1;
+  const bi=beatAt(now), b=beats[bi], u=now<0?0:Math.max(0,Math.min(1,(now-b.t0)/(b.t1-b.t0)));
+  const running=state!=='idle';
+
+  // 背景：黑夜星空
+  g.globalCompositeOperation='source-over';
+  const sky=g.createLinearGradient(0,0,0,H); sky.addColorStop(0,'#0c1c5a'); sky.addColorStop(1,'#060f34'); g.fillStyle=sky; g.fillRect(0,0,W,H);
+  const vg=g.createRadialGradient(W/2,H*.6,0,W/2,H*.6,Math.max(W,H)*.7);
+  vg.addColorStop(0,hexA(b.color,.09)); vg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=vg; g.fillRect(0,0,W,H);
+  stars.forEach(s=>{ g.fillStyle=`rgba(255,255,255,${.25+.35*Math.sin(ts/900+s.p)})`; g.fillRect(s.x,s.y,s.r,s.r); });
+
+  // 上方
+  g.textBaseline='middle';
+  g.fillStyle=hexA(b.color,.18); g.strokeStyle=b.color; g.lineWidth=1.5;
+  g.beginPath(); g.roundRect?g.roundRect(16,14,Math.max(46,22+g.measureText(b.sec.label).width),34,17):g.rect(16,14,50,34); g.fill(); g.stroke();
+  g.fillStyle=b.color; g.font='900 18px "Noto Sans TC"'; g.textAlign='center'; g.fillText(b.sec.label,16+Math.max(46,22)/2,32);
+  g.textAlign='left'; g.font='700 15px "Noto Sans TC"'; g.fillText(b.sec.name,76,32);
+  for(let k=0;k<4;k++){
+    const x=W-130+k*30, on=k===curPulse().beatInBar&&running&&now>=0;
+    g.save(); if(on){ g.shadowColor=b.color; g.shadowBlur=14; }
+    g.fillStyle=on?b.color:hexA(b.color,.18); g.beginPath(); g.arc(x,31,on?11:8,0,7); g.fill(); g.restore();
+    g.fillStyle=on?'#000':hexA(b.color,.8); g.font='700 12px Fredoka'; g.textAlign='center'; g.fillText(k+1,x,32);
+  }
+  g.save(); g.textAlign='center'; g.font='900 '+Math.min(38,W/24)+'px "Noto Sans TC"';
+  g.shadowColor=b.color; g.shadowBlur=18; g.fillStyle='#fff'; g.fillText(GEST[b.type].name+(CLOSED.has(b.type)?`（${b.n} 拍）`:''),W/2,34);
+  g.shadowBlur=8; g.font='700 15px "Noto Sans TC"'; g.fillStyle=b.color; g.fillText(`${b.dirLabel[0]}  這一小節：${b.dirLabel[1]}`,W/2,64); g.restore();
+
+  const lw=5+b.vel*7;
+  // 上一拍的光（慢慢消失）
+  const pb=beats[bi-1];
+  if(running&&pb&&now>=0){ const fade=Math.max(0,1-u*1.6); glow(g,pb,0,1,pb.color,5+pb.vel*7,.55*fade); }
+  // 下一拍預告
+  const nb=beats[bi+1];
+  if(preview&&nb){ g.save(); g.setLineDash([2,10]); g.lineCap='round'; path(g,nb,0,1); g.strokeStyle=hexA(nb.color,.35); g.lineWidth=3; g.stroke(); g.restore(); }
+  // 這一拍：還沒畫的部分（淡淡的光點）
+  g.save(); g.setLineDash([3,9]); g.lineCap='round'; path(g,b,u,1); g.shadowColor=b.color; g.shadowBlur=8; g.strokeStyle=hexA(b.color,.6); g.lineWidth=3.5; g.stroke(); g.restore();
+  // 終點小箭頭光點
+  const [ex,ey]=gp(b,1); g.save(); g.globalCompositeOperation='lighter'; g.shadowColor=b.color; g.shadowBlur=12; g.fillStyle=hexA(b.color,.8); g.beginPath(); g.arc(ex,ey,4,0,7); g.fill(); g.restore();
+  // 畫過的部分：魔法光線
+  if(running&&now>=0) glow(g,b,0,u,b.color,lw);
+
+  // 計分
+  const ball=gp(b,u), tol=Math.max(48,Math.min(W,H)*.11);
+  let hitting=false;
+  if(state==='playing'&&now>=0&&now<=total){
+    const active=ptr.type==='mouse'?ptr.inside:ptr.active;
+    hitting=active&&Math.hypot(ptr.x-ball[0],ptr.y-ball[1])<tol;
+    totT+=dtR; b.tot+=dtR; secs[b.si].tot+=dtR;
+    if(hitting){ hitT+=dtR; b.hit+=dtR; secs[b.si].hit+=dtR; }
+    if(active) trail.push({x:ptr.x,y:ptr.y,hit:hitting,r:performance.now()});
+  }
+  // 火花
+  if(state==='playing'){
+    const n=hitting?4:1.2+b.vel;
+    for(let i=0;i<n;i++) if(Math.random()<n/Math.ceil(n)) parts.push({x:ball[0],y:ball[1],vx:(Math.random()-.5)*2.4,vy:(Math.random()-.5)*2.4-.4,l:1,s:Math.random()*2+1,c:Math.random()<.6?'#ffc94d':b.color});
+  }
+  parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.02;p.vx*=.98;p.l-=.022;});
+  parts=parts.filter(p=>p.l>0).slice(-500);
+  g.save(); g.globalCompositeOperation='lighter';
+  parts.forEach(p=>{ g.globalAlpha=p.l; g.fillStyle=p.c; g.beginPath(); g.arc(p.x,p.y,p.s*p.l+.4,0,7); g.fill(); });
+  g.restore();
+
+  // 手指軌跡
+  const keep=performance.now()-600; trail=trail.filter(p=>p.r>keep);
+  g.save(); g.globalCompositeOperation='lighter'; g.lineCap='round';
+  for(let i=1;i<trail.length;i++){
+    const a=trail[i-1],c=trail[i]; if(c.r-a.r>120) continue;
+    g.globalAlpha=(c.r-keep)/600; g.strokeStyle=c.hit?'#ffe08a':'#8a86a0'; g.lineWidth=c.hit?6:4;
+    g.shadowColor=c.hit?'#ffb347':'transparent'; g.shadowBlur=c.hit?12:0;
+    g.beginPath(); g.moveTo(a.x,a.y); g.lineTo(c.x,c.y); g.stroke();
+  }
+  g.restore();
+
+  // 魔法光圈（引導）
+  if(guide||now<0||!running) magicRing(ball[0],ball[1],16+b.vel*14,b.color,ts);
+  if((ptr.type==='mouse'&&ptr.inside)||ptr.active){
+    g.save(); g.strokeStyle=hitting?'#ffe08a':'rgba(255,255,255,.6)'; g.lineWidth=2.5; if(hitting){g.shadowColor='#ffb347';g.shadowBlur=16;}
+    g.beginPath(); g.arc(ptr.x,ptr.y,hitting?20:15,0,7); g.stroke(); g.restore();
+  }
+
+  if(state==='playing'&&now<0){
+    const n=Math.min(4,Math.ceil(-now/beatLen()));
+    g.save(); g.textAlign='center'; g.shadowColor='#ffb347'; g.shadowBlur=30; g.fillStyle='#fff';
+    g.font='700 '+Math.min(120,H*.26)+'px Fredoka'; g.fillText(n,W/2,H*.3);
+    g.shadowBlur=0; g.font='700 18px "Noto Sans TC"'; g.fillStyle='#d9d3c5'; g.fillText('手指放在魔法光圈上，聽 4 拍就開始 ✋',W/2,H*.3+Math.min(74,H*.16)); g.restore();
+  }
+  if(state==='idle'){ g.save(); g.textAlign='center'; g.font='700 16px "Noto Sans TC"'; g.fillStyle='#9a95a8'; g.fillText('按「▶ 開始」或空白鍵，跟著魔法光圈一起畫 ✨',W/2,H-20); g.restore(); }
+
+  const sS=document.getElementById('sSec');
+  if(running){ sS.textContent=GEST[b.type].name; sS.style.color=b.color; document.getElementById('sAcc').textContent=totT>0?Math.round(hitT/totT*100)+'%':'–'; }
+  else { sS.textContent='–'; sS.style.color=''; document.getElementById('sAcc').textContent='–'; }
+
+  drawStrip(bi,running&&now>=0?u:0);
+  requestAnimationFrame(draw);
+}
+
+/* ===================== 拍子條 ===================== */
+function drawStrip(bi,frac){
+  if(!SW) return;
+  sg.clearRect(0,0,SW,SH);
+  const cw=50, cx=SW/2;
+  let acc=0; beats.forEach(b=>{ b.sx=acc; acc+=b.n; });
+  const off=(beats[bi].sx+frac*beats[bi].n)*cw;
+  for(let i=Math.max(0,bi-16);i<Math.min(beats.length,bi+18);i++){
+    const b=beats[i], x0=cx+b.sx*cw-off, w=b.n*cw;
+    if(x0>SW||x0+w<0) continue;
+    if(b.barStart){ sg.strokeStyle='#22223a'; sg.lineWidth=1.5; sg.beginPath(); sg.moveTo(x0,10); sg.lineTo(x0,SH-10); sg.stroke(); sg.fillStyle=hexA(b.color,.8); sg.font='700 13px sans-serif'; sg.textBaseline='top'; sg.fillText(b.dirLabel[0],x0+4,4); }
+    const past=i<bi&&state!=='idle', cur=i===bi&&state!=='idle';
+    let G=glyphPts(b.type,Math.sign((b.m1||0)-(b.m0||0)));
+    if(b.vert&&!CLOSED.has(b.type)){ const dir=Math.sign(b.ay1-b.ay0)||1, raw=G.raw.map(([x,y])=>[-y*b.side,x*dir]); let a=1e9,c=-1e9,d=1e9,e=-1e9; raw.forEach(([x,y])=>{a=Math.min(a,x);c=Math.max(c,x);d=Math.min(d,y);e=Math.max(e,y);}); G={raw,x0:a,x1:c,y0:d,y1:e}; }
+    const P=fitPts(G,x0+w/2,SH/2+3,Math.min(w-14,CLOSED.has(b.type)?SH*.9:w),SH*.48);
+    sg.save(); sg.lineCap='round'; sg.lineJoin='round'; sg.globalCompositeOperation='lighter';
+    sg.beginPath(); P.forEach(([x,y],k)=>k?sg.lineTo(x,y):sg.moveTo(x,y));
+    if(cur){ sg.shadowColor=b.color; sg.shadowBlur=14; }
+    sg.strokeStyle=past?hexA(b.color,.3):b.color; sg.lineWidth=cur?3.2:2.2; sg.stroke(); sg.restore();
+    if(b.n>1){ sg.fillStyle=hexA(b.color,past?.3:.7); sg.font='700 10px sans-serif'; sg.textBaseline='bottom'; sg.textAlign='right'; sg.fillText(b.n+'拍',x0+w-4,SH-3); sg.textAlign='left'; }
+  }
+  sg.save(); sg.strokeStyle='#ffc94d'; sg.shadowColor='#ffb347'; sg.shadowBlur=8; sg.lineWidth=2;
+  sg.beginPath(); sg.moveTo(cx,3); sg.lineTo(cx,11); sg.moveTo(cx,SH-11); sg.lineTo(cx,SH-3); sg.stroke(); sg.restore();
+}
+
+/* ===================== 指標 ===================== */
+function pos(e){ const r=cv.getBoundingClientRect(); ptr.x=e.clientX-r.left; ptr.y=e.clientY-r.top; ptr.type=e.pointerType; }
+cv.addEventListener('pointerdown',e=>{ pos(e); ptr.active=true; ptr.inside=true; try{cv.setPointerCapture(e.pointerId);}catch(_){} });
+cv.addEventListener('pointermove',e=>{ pos(e); ptr.inside=true; });
+cv.addEventListener('pointerup',e=>{ ptr.active=false; if(e.pointerType!=='mouse') ptr.inside=false; });
+cv.addEventListener('pointercancel',()=>{ ptr.active=false; ptr.inside=false; });
+cv.addEventListener('pointerleave',e=>{ if(e.pointerType==='mouse') ptr.inside=false; });
+
+/* ===================== 結果 ===================== */
+const overlay=document.getElementById('overlay');
+function showResult(){
+  const acc=totT?Math.round(hitT/totT*100):0, st=acc>=80?3:acc>=55?2:acc>=30?1:0;
+  document.getElementById('rStars').textContent='★'.repeat(st)+'☆'.repeat(3-st);
+  document.getElementById('rTitle').textContent=['再試一次，你可以的！','不錯喔！','好厲害！','魔法音樂大師！'][st];
+  document.getElementById('rAcc').textContent=acc+'%';
+  document.getElementById('rChips').innerHTML=secs.map(s=>`<span class="chip" style="background:${s.color}">${s.name} ${s.tot?Math.round(s.hit/s.tot*100):0}%</span>`).join('');
+  const k={}; beats.forEach(b=>{k[b.type]=k[b.type]||{h:0,t:0}; k[b.type].h+=b.hit; k[b.type].t+=b.tot;});
+  const w=Object.entries(k).filter(([,v])=>v.t>0).sort((a,b)=>a[1].h/a[1].t-b[1].h/b[1].t)[0];
+  document.getElementById('rTip').textContent=w?`最需要練習的是「${GEST[w[0]].name}」，把速度調慢一點再試試看！`:'';
+  overlay.classList.add('show');
+}
+function hideResult(){ overlay.classList.remove('show'); }
+
+build(); renderTracks();
+document.getElementById('taskTxt').textContent=track.task;
+setUI(); requestAnimationFrame(draw);
+</script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>節拍器｜班級音樂盒</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#f4f1ff;--muted:rgba(225,235,255,.78);--gold:#ffd77a;--panel:rgba(8,18,66,.62);--line:rgba(255,255,255,.28);--cream1:#fffaf0;--cream2:#f6ecd0;--navy:#17235f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:#1b2f8f;min-height:100dvh}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(10,18,70,.5),rgba(10,18,70,.25) 35%,rgba(10,18,70,.5)),url("bg.jpg") 50% 55%/cover no-repeat}
+  .wrap{position:relative;z-index:1;width:min(560px,100%);margin:0 auto;padding:14px 16px 22px;display:flex;flex-direction:column;gap:12px;min-height:100dvh}
+
+  header{display:flex;align-items:center;gap:12px}
+  header h1{flex:1;font-size:clamp(24px,5vw,34px);font-weight:900;letter-spacing:.08em;line-height:1.1;
+    background:linear-gradient(180deg,#fff 10%,#fff1c4 55%,#e9b44c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(30,40,120,.55)) drop-shadow(0 0 16px rgba(255,220,140,.3))}
+  header h1 small{display:block;font-size:11px;font-weight:500;letter-spacing:.35em;-webkit-text-fill-color:var(--gold)}
+  .btn{font:inherit;font-weight:700;font-size:14px;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;
+    padding:8px 14px;border-radius:999px;background:var(--panel);border:1.5px dashed rgba(255,255,255,.5);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .btn:hover,.btn:focus-visible{box-shadow:0 0 16px rgba(255,236,170,.45);outline:none}
+
+  /* 分段選擇列 */
+  .segs{display:grid;gap:8px}
+  .seg{display:flex;align-items:center;gap:8px}
+  .seg>span{flex:none;width:3.2em;font-size:13px;font-weight:700;color:var(--muted);text-shadow:0 1px 4px rgba(4,10,50,.7)}
+  .seg>div{flex:1;display:flex;border-radius:999px;overflow:hidden;background:var(--panel);border:1.5px dashed rgba(255,255,255,.45);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .seg button{flex:1;font:inherit;font-weight:700;font-size:14px;padding:8px 4px;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:999px}
+  .seg button.on{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy)}
+  .seg button:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
+
+  /* 拍點 */
+  .dots{display:flex;justify-content:center;gap:12px;min-height:22px;align-items:center}
+  .dots i{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.25);transition:transform .08s,background .08s,box-shadow .08s}
+  .dots i.acc{width:17px;height:17px;border:2px solid rgba(255,215,122,.8);background:transparent}
+  .dots i.hit{background:#fff;transform:scale(1.35);box-shadow:0 0 14px #fff}
+  .dots i.acc.hit{background:var(--gold);box-shadow:0 0 18px var(--gold)}
+
+  /* 節拍器本體 */
+  .metro{position:relative;width:min(100%,56vh,400px);margin:0 auto;aspect-ratio:360/440}
+  .metro svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .bpm{position:absolute;left:0;right:0;top:11%;display:flex;align-items:center;justify-content:center;gap:clamp(10px,4vw,22px)}
+  .bpm b{font-size:clamp(46px,13vw,68px);font-weight:900;line-height:1;min-width:2.2ch;text-align:center;text-shadow:0 2px 12px rgba(4,10,50,.7)}
+  .bpm button{width:38px;height:38px;border-radius:50%;border:1.5px dashed rgba(255,255,255,.55);background:rgba(8,18,66,.7);color:#fff;font-size:22px;font-weight:700;cursor:pointer;line-height:1}
+  .bpm button:active{transform:scale(.92)}
+  .unit{position:absolute;left:0;right:0;top:27.5%;text-align:center;font-size:13px;letter-spacing:.2em;color:var(--muted)}
+  .unit em{font-style:normal;color:var(--gold);font-weight:700;letter-spacing:.05em;margin-left:6px}
+
+  /* 速度滑桿與預設 */
+  input[type=range]{width:100%;accent-color:var(--gold);height:28px}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center;align-self:center}
+  .chip{font:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;padding:6px 12px;border-radius:999px;
+    background:rgba(190,205,240,.16);border:1.5px solid var(--line);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .chip small{font-weight:500;color:var(--muted);margin-left:4px}
+  .chip.on{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy);border-color:transparent}
+  .chip.on small{color:#4a5590}
+
+  /* 底部控制 */
+  .ctrl{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-top:2px}
+  .side{display:flex;flex-direction:column;align-items:center;gap:3px;font:inherit;color:#fff;background:none;border:0;cursor:pointer;font-size:12px;font-weight:700}
+  .side .ico{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:1.5px dashed rgba(255,255,255,.55);font-size:19px}
+  .side.on .ico{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy);border-style:solid;border-color:transparent;box-shadow:0 0 16px rgba(255,236,170,.5)}
+  .side:active .ico{transform:scale(.93)}
+  .play{width:clamp(120px,34vw,160px);height:58px;border:0;border-radius:999px;cursor:pointer;font-size:24px;color:var(--navy);
+    background:linear-gradient(180deg,var(--cream1),var(--cream2));box-shadow:0 3px 0 rgba(120,100,40,.3),0 0 22px rgba(255,236,170,.5);transition:transform .1s}
+  .play:active{transform:scale(.96)}
+  .play.on{background:linear-gradient(180deg,#fff1c4,#ffd77a)}
+  .note{font-size:12.5px;color:var(--muted);text-align:center;min-height:1.4em;text-shadow:0 1px 4px rgba(4,10,50,.8)}
+  footer{margin-top:auto;font-size:12px;color:rgba(235,240,255,.75);text-align:center;text-shadow:0 1px 4px rgba(4,10,50,.8)}
+  @media (min-width:900px) and (min-aspect-ratio:4/3){
+    .wrap{width:min(980px,100%);display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"h h" "m s" "m d" "m r" "m p" "m c" "m n" "f f";column-gap:28px;align-content:center;align-items:center}
+    header{grid-area:h}.segs{grid-area:s}.dots{grid-area:d}.metro{grid-area:m;width:min(100%,70vh,440px);align-self:center}
+    .range{grid-area:r}.presets{grid-area:p}.ctrl{grid-area:c}.note{grid-area:n}footer{grid-area:f}
+  }
+
+  /* ===== 教室大螢幕（橫式）放大 ===== */
+  :root{--z:1}
+  @media (min-width:1500px) and (min-height:800px){ :root{--z:1.3} }
+  @media (min-width:1850px) and (min-height:1000px){ :root{--z:1.6} }
+  @media (min-width:2500px) and (min-height:1350px){ :root{--z:2.1} }
+  @media (min-width:3400px) and (min-height:1900px){ :root{--z:3} }
+  @media (min-width:900px) and (min-aspect-ratio:4/3){
+    .wrap{zoom:var(--z); min-height:calc(100dvh / var(--z)); width:min(1080px,100%)}
+    .metro{width:min(100%, calc(72vh / var(--z)), 460px)}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>節拍器<small>METRONOME</small></h1>
+    <a class="btn" href="index.html">← 回音樂盒</a>
+  </header>
+
+  <div class="segs">
+    <div class="seg" id="segSig"><span>拍號</span><div>
+      <button data-v="2">2/4</button><button data-v="3">3/4</button><button data-v="4" class="on">4/4</button><button data-v="6">6/8</button></div></div>
+    <div class="seg" id="segSub"><span>細分</span><div>
+      <button data-v="1" class="on">♩ 一拍一下</button><button data-v="2">♫ 兩下</button><button data-v="3">三連音</button></div></div>
+    <div class="seg" id="segSnd"><span>音色</span><div>
+      <button data-v="wood" class="on">木魚</button><button data-v="beep">電子</button><button data-v="bell">鈴聲</button></div></div>
+  </div>
+
+  <div class="dots" id="dots" aria-hidden="true"></div>
+
+  <div class="metro">
+    <svg viewBox="0 0 360 440" aria-hidden="true">
+      <defs>
+        <linearGradient id="bodyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22408f" stop-opacity=".78"/><stop offset="1" stop-color="#0a1748" stop-opacity=".86"/></linearGradient>
+        <linearGradient id="wG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ffd77a"/></linearGradient>
+        <linearGradient id="rodG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".85" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+        <filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- 梯形機身 -->
+      <path d="M118 14 H242 Q268 14 274 40 L348 404 Q352 430 326 430 H34 Q8 430 12 404 L86 40 Q92 14 118 14Z" fill="url(#bodyG)" stroke="rgba(190,215,255,.75)" stroke-width="4"/>
+      <path d="M122 26 H238 Q258 26 263 46 L334 404 Q336 418 322 418 H38 Q24 418 26 404 L97 46 Q102 26 122 26Z" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <!-- 刻度 -->
+      <g stroke="rgba(220,232,255,.55)" stroke-width="1.6" fill="none" id="ticks"></g>
+      <!-- 擺桿 -->
+      <g id="pend" transform="rotate(0 180 404)">
+        <rect x="176.5" y="140" width="7" height="266" rx="3.5" fill="url(#rodG)" filter="url(#gl)"/>
+        <g id="weight" transform="translate(0 0)">
+          <path d="M160 -22 H200 L206 22 Q206 28 200 28 H160 Q154 28 154 22Z" fill="url(#wG)" stroke="#fff" stroke-width="1.5" filter="url(#gl)"/>
+          <path d="M166 -10 H194 M165 2 H195 M164 14 H196" stroke="rgba(23,35,95,.35)" stroke-width="2"/>
+        </g>
+      </g>
+      <circle cx="180" cy="404" r="9" fill="#fff0b3" filter="url(#gl)"/>
+    </svg>
+    <div class="bpm">
+      <button id="minus" aria-label="慢一點">−</button>
+      <b id="bpmTxt" aria-live="polite">96</b>
+      <button id="plus" aria-label="快一點">＋</button>
+    </div>
+    <div class="unit">BPM<em id="tempoName">中板</em></div>
+  </div>
+
+  <div class="range"><input type="range" id="range" min="40" max="208" step="1" value="96" aria-label="速度"></div>
+
+  <div class="presets" id="presets"></div>
+
+  <div class="ctrl">
+    <button class="side" id="tap"><span class="ico">✋</span>跟拍測速</button>
+    <button class="play" id="play" aria-label="開始或停止">▶</button>
+    <button class="side" id="auto"><span class="ico">⏫</span>自動加速</button>
+  </div>
+  <p class="note" id="note">按 ▶ 開始；空白鍵也可以開始／停止，← → 調整速度</p>
+
+  <footer>Ray's Classroom Lab · 班級音樂盒｜Design by Ray Chen／陳耿睿</footer>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const MIN = 40, MAX = 208;
+  const PRESETS = [['慢板',60],['行板',76],['中板',96],['快板',120],['急板',168]];
+  let bpm = 96, beats = 4, sub = 1, snd = 'wood', auto = false;
+  let ctx = null, playing = false, timer = null, nextTime = 0, step = 0, barCount = 0, startedAt = 0;
+  let queue = [], swingFrom = 0, swingDur = .6, swingSign = 1, angle = 0;
+
+  /* ---------- 介面 ---------- */
+  const ticks = $('ticks'); let th = '';
+  for (let i = 0; i < 13; i++){ const y = 150 + i*19, w = i%4===0 ? 22 : 13; th += `<path d="M${168-w} ${y}H168M192 ${y+9}H${192+w}"/>`; }
+  ticks.innerHTML = th + '<path d="M168 140V388M192 140V388"/>';
+  $('presets').innerHTML = PRESETS.map(([n,v]) => `<button class="chip" data-v="${v}">${n}<small>${v}</small></button>`).join('');
+
+  function tempoName(v){ return v<60?'最緩板':v<72?'慢板':v<92?'行板':v<112?'中板':v<140?'快板':v<180?'急板':'最急板'; }
+  function setBpm(v, quiet){
+    bpm = Math.max(MIN, Math.min(MAX, Math.round(v)));
+    $('bpmTxt').textContent = bpm; $('range').value = bpm; $('tempoName').textContent = tempoName(bpm);
+    document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', +c.dataset.v === bpm));
+    // 擺錘位置：越快越靠近底部支點
+    const y = 172 + (bpm-MIN)/(MAX-MIN)*180;
+    $('weight').setAttribute('transform', `translate(0 ${y})`);
+  }
+  function drawDots(){
+    $('dots').innerHTML = Array.from({length:beats}, (_,i) => `<i class="${isAccent(i)?'acc':''}"></i>`).join('');
+  }
+  const isAccent = i => i === 0 || (beats === 6 && i === 3);
+  function seg(id, fn){
+    const el = $(id);
+    el.querySelectorAll('button').forEach(b => b.onclick = () => {
+      el.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); fn(b.dataset.v);
+    });
+  }
+  seg('segSig', v => { beats = +v; step = 0; drawDots(); });
+  seg('segSub', v => { sub = +v; step = 0; });
+  seg('segSnd', v => { snd = v; });
+  $('minus').onclick = () => setBpm(bpm-1);
+  $('plus').onclick  = () => setBpm(bpm+1);
+  $('range').oninput = e => setBpm(+e.target.value);
+  $('presets').onclick = e => { const c = e.target.closest('.chip'); if (c) setBpm(+c.dataset.v); };
+  // 長按 ± 連續調整
+  [['minus',-1],['plus',1]].forEach(([id,d]) => { let h, r;
+    const stop = () => { clearTimeout(h); clearInterval(r); };
+    $(id).addEventListener('pointerdown', () => { h = setTimeout(() => r = setInterval(() => setBpm(bpm+d), 60), 400); });
+    ['pointerup','pointerleave','pointercancel'].forEach(ev => $(id).addEventListener(ev, stop));
+  });
+
+  /* ---------- 跟拍測速 ---------- */
+  let taps = [];
+  $('tap').onclick = () => {
+    const now = performance.now();
+    if (taps.length && now - taps[taps.length-1] > 2500) taps = [];
+    taps.push(now); if (taps.length > 5) taps.shift();
+    if (taps.length >= 2){ const avg = (taps[taps.length-1]-taps[0])/(taps.length-1); setBpm(60000/avg); $('note').textContent = '測到的速度：' + bpm + ' BPM'; }
+    else $('note').textContent = '繼續照你想要的速度點…';
+  };
+
+  /* ---------- 自動加速 ---------- */
+  $('auto').onclick = () => {
+    auto = !auto; $('auto').classList.toggle('on', auto); barCount = 0;
+    $('note').textContent = auto ? '自動加速：每 4 小節快 5 BPM（最快 ' + MAX + '）' : '自動加速已關閉';
+  };
+
+  /* ---------- 聲音 ---------- */
+  function click(t, kind){            // kind: 2 重音, 1 一般拍, 0 細分
+    const out = ctx.createGain(); out.connect(ctx.destination);
+    const vol = kind === 2 ? 1 : kind === 1 ? .7 : .35;
+    if (snd === 'wood'){
+      const o = ctx.createOscillator(), g = ctx.createGain(), bp = ctx.createBiquadFilter();
+      const f = kind === 2 ? 1250 : kind === 1 ? 900 : 700;
+      o.type = 'triangle'; o.frequency.setValueAtTime(f*1.25, t); o.frequency.exponentialRampToValueAtTime(f, t+.02);
+      bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 6;
+      g.gain.setValueAtTime(.9*vol, t); g.gain.exponentialRampToValueAtTime(.001, t+.09);
+      o.connect(bp).connect(g).connect(out); o.start(t); o.stop(t+.12);
+    } else if (snd === 'beep'){
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = kind === 2 ? 1760 : kind === 1 ? 1175 : 880;
+      g.gain.setValueAtTime(.22*vol, t); g.gain.exponentialRampToValueAtTime(.001, t+.06);
+      o.connect(g).connect(out); o.start(t); o.stop(t+.08);
+    } else {
+      const f = kind === 2 ? 2093 : kind === 1 ? 1568 : 1319;
+      [[1,.5],[2.76,.18],[5.4,.07]].forEach(([k,a]) => { const o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.value = f*k; g.gain.setValueAtTime(a*vol, t); g.gain.exponentialRampToValueAtTime(.001, t+.5/k+.15);
+        o.connect(g).connect(out); o.start(t); o.stop(t+.8); });
+    }
+  }
+
+  /* ---------- 排程 ---------- */
+  function schedule(){
+    while (nextTime < ctx.currentTime + .12){
+      const beat = Math.floor(step/sub) % beats, onBeat = step % sub === 0;
+      const dur = 60/bpm;
+      click(nextTime, onBeat ? (isAccent(beat) ? 2 : 1) : 0);
+      if (onBeat) queue.push({t: nextTime, beat, dur});
+      step++;
+      if (step % (beats*sub) === 0){
+        step = 0; barCount++;
+        if (auto && barCount % 4 === 0 && bpm < MAX) pendingBpm = Math.min(MAX, bpm+5);
+      }
+      nextTime += dur/sub;
+      if (pendingBpm && step === 0){ setBpm(pendingBpm); pendingBpm = 0; }
+    }
+  }
+  let pendingBpm = 0;
+  function start(){
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+    playing = true; step = 0; barCount = 0; queue = []; swingSign = 1;
+    nextTime = ctx.currentTime + .08; startedAt = performance.now();
+    schedule(); timer = setInterval(schedule, 25);
+    $('play').textContent = '⏸'; $('play').classList.add('on');
+  }
+  function stop(){
+    playing = false; clearInterval(timer); queue = [];
+    $('play').textContent = '▶'; $('play').classList.remove('on');
+    document.querySelectorAll('.dots i').forEach(d => d.classList.remove('hit'));
+    $('note').textContent = '已停止';
+  }
+  $('play').onclick = () => { try { playing ? stop() : start(); } catch(e){ $('note').textContent = '這個裝置無法播放聲音'; } };
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space'){ e.preventDefault(); $('play').click(); }
+    if (e.code === 'ArrowRight' || e.code === 'ArrowUp'){ e.preventDefault(); setBpm(bpm+1); }
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowDown'){ e.preventDefault(); setBpm(bpm-1); }
+  });
+
+  /* ---------- 動畫：擺桿與拍點 ---------- */
+  const pend = $('pend'), AMP = 22;
+  function frame(){
+    if (playing && ctx){
+      const now = ctx.currentTime;
+      while (queue.length && queue[0].t <= now){
+        const q = queue.shift();
+        swingFrom = q.t; swingDur = q.dur; swingSign = -swingSign;
+        const dots = document.querySelectorAll('.dots i');
+        dots.forEach((d,i) => d.classList.toggle('hit', i === q.beat));
+        setTimeout(() => dots[q.beat] && dots[q.beat].classList.remove('hit'), Math.min(180, q.dur*500));
+      }
+      const ph = Math.min(1, Math.max(0, (now - swingFrom)/swingDur));
+      angle = swingSign * AMP * Math.cos(Math.PI*ph);
+      const s = Math.floor((performance.now()-startedAt)/1000);
+      if (!auto || barCount === 0) $('note').textContent = '已練習 ' + Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+      else $('note').textContent = '自動加速中・已練習 ' + Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+    } else angle *= .9;
+    pend.setAttribute('transform', `rotate(${angle.toFixed(2)} 180 404)`);
+    requestAnimationFrame(frame);
+  }
+
+  drawDots(); setBpm(96); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

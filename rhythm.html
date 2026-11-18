@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拍子練習｜班級音樂盒</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#f4f1ff;--muted:rgba(225,235,255,.78);--gold:#ffd77a;--panel:rgba(8,18,66,.66);--line:rgba(255,255,255,.28);--cream1:#fffaf0;--cream2:#f6ecd0;--navy:#17235f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:#1b2f8f;min-height:100dvh}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(10,18,70,.55),rgba(10,18,70,.3) 35%,rgba(10,18,70,.55)),url("bg.jpg") 50% 55%/cover no-repeat}
+  .wrap{position:relative;z-index:1;width:min(1180px,100%);margin:0 auto;padding:14px 16px 20px;display:flex;flex-direction:column;gap:12px;min-height:100dvh}
+  header{display:flex;align-items:center;gap:12px}
+  header h1{flex:1;font-size:clamp(24px,4vw,34px);font-weight:900;letter-spacing:.08em;line-height:1.1;
+    background:linear-gradient(180deg,#fff 10%,#fff1c4 55%,#e9b44c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(30,40,120,.55)) drop-shadow(0 0 16px rgba(255,220,140,.3))}
+  header h1 small{display:block;font-size:11px;font-weight:500;letter-spacing:.3em;-webkit-text-fill-color:var(--gold)}
+  .btn{font:inherit;font-weight:700;font-size:14px;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;
+    padding:8px 14px;border-radius:999px;background:var(--panel);border:1.5px dashed rgba(255,255,255,.5);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .btn:hover,.btn:focus-visible{box-shadow:0 0 16px rgba(255,236,170,.45);outline:none}
+  .btn.primary{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy);border:none;box-shadow:0 2px 0 rgba(120,100,40,.25),0 0 18px rgba(255,236,170,.45)}
+  .btn:active{transform:scale(.96)}
+  .panel{background:var(--panel);border-radius:26px;padding:12px 14px;border:1.5px solid rgba(255,255,255,.16);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(4,10,50,.3)}
+  .panel h2{font-size:14px;font-weight:700;letter-spacing:.06em;margin-bottom:8px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .panel h2 small{font-weight:400;font-size:12.5px;color:var(--muted)}
+
+  /* 拍子卡片 */
+  .palette{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+  .cellcard{position:relative;border-radius:18px;padding:4px 4px 6px;text-align:center;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;
+    background:rgba(190,205,240,.12);border:1.5px solid var(--line);color:#fff;transition:background .15s,box-shadow .15s}
+  .cellcard svg{display:block;width:100%;height:58px;pointer-events:none}
+  .cellcard b{display:block;font-size:13px;pointer-events:none}
+  .cellcard small{display:block;font-size:11px;color:var(--muted);pointer-events:none}
+  .cellcard.on{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy);border-color:transparent;box-shadow:0 0 14px rgba(255,236,170,.4)}
+  .cellcard.on small{color:#4a5590}
+  .cellcard .add{position:absolute;right:4px;top:4px;width:26px;height:26px;border-radius:50%;border:1.5px dashed currentColor;background:rgba(8,18,66,.55);color:#fff;font-size:16px;font-weight:700;line-height:1;cursor:pointer;touch-action:manipulation}
+  .cellcard.on .add{background:var(--navy)}
+  .ghost{position:fixed;z-index:50;pointer-events:none;width:110px;opacity:.9;transform:translate(-50%,-60%) scale(1.08)}
+
+  /* 控制列 */
+  .bar-ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .seg{display:inline-flex;border-radius:999px;overflow:hidden;background:var(--panel);border:1.5px dashed rgba(255,255,255,.45)}
+  .seg button{font:inherit;font-weight:700;font-size:13.5px;padding:7px 12px;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:999px;white-space:nowrap}
+  .seg button.on{background:linear-gradient(180deg,var(--cream1),var(--cream2));color:var(--navy)}
+  .field{display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;text-shadow:0 1px 4px rgba(4,10,50,.7)}
+  .field input{accent-color:var(--gold);width:120px}
+  .lab{font-size:13px;font-weight:700;color:var(--muted)}
+
+  /* 小節 */
+  .bars{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+  .bar{position:relative;border-radius:20px;background:rgba(4,9,36,.72);border:1.5px solid rgba(255,255,255,.2);padding:2px 4px;transition:box-shadow .15s,border-color .15s}
+  .bar.drop{border-color:var(--gold);box-shadow:0 0 18px rgba(255,220,140,.6)}
+  .bar.playing{border-color:rgba(255,236,170,.8)}
+  .bar svg{display:block;width:100%;height:auto}
+  .bar .num{position:absolute;left:10px;top:6px;font-size:11px;font-weight:700;color:var(--muted)}
+  .note{color:#f3f5ff;transition:color .05s}
+  .note.now{color:var(--gold);filter:drop-shadow(0 0 6px rgba(255,220,140,.9))}
+  .hit{cursor:pointer;fill:transparent}
+  .hit:hover{fill:rgba(255,120,140,.14)}
+  .chk{stroke:rgba(255,255,255,.22);stroke-width:5;stroke-linecap:round;fill:none}
+  .chk.rest{stroke-dasharray:2 8}
+  .chk.on{stroke:var(--gold);filter:drop-shadow(0 0 5px rgba(255,220,140,.9))}
+  .chk.rest.on{stroke:#8fb4ff;filter:none}
+  .syl{font-size:11px;fill:rgba(225,235,255,.8);text-anchor:middle;font-family:inherit}
+  .hide-syl .syl{display:none}
+  .empty{fill:none;stroke:rgba(255,255,255,.22);stroke-width:1.5;stroke-dasharray:5 5}
+  .count{position:fixed;inset:0;z-index:40;display:none;place-items:center;pointer-events:none;font-size:min(40vw,240px);font-weight:900;color:#fff;text-shadow:0 0 40px rgba(255,220,140,.9)}
+  .count.show{display:grid}
+  .msg{font-size:13px;color:var(--muted);min-height:1.4em;text-shadow:0 1px 4px rgba(4,10,50,.8)}
+  footer{margin-top:auto;font-size:12px;color:rgba(235,240,255,.75);text-align:center;text-shadow:0 1px 4px rgba(4,10,50,.8)}
+
+  /* ===== 教室大螢幕（橫式）：一頁滿版，不用捲動 ===== */
+  :root{--z:1}
+  @media (min-width:1700px) and (min-height:900px){ :root{--z:1.2} }
+  @media (min-width:2300px) and (min-height:1250px){ :root{--z:1.6} }
+  @media (min-width:3000px) and (min-height:1700px){ :root{--z:2.2} }
+  @media (min-width:900px) and (orientation:landscape){
+    .wrap{zoom:var(--z); width:100%; max-width:none; height:calc(100dvh / var(--z)); min-height:0; padding:10px 18px 12px;
+      display:grid; grid-template-columns:clamp(190px,16vw,250px) 1fr; grid-template-rows:auto 1fr auto auto;
+      grid-template-areas:"h h" "p b" "c c" "m m"; gap:10px 12px}
+    header{grid-area:h} .p-pal{grid-area:p} .p-bars{grid-area:b} .p-ctrl{grid-area:c} .msg{grid-area:m; padding-right:340px}
+    footer{position:absolute; right:18px; bottom:12px; margin:0}
+    .p-pal,.p-bars{display:flex; flex-direction:column; min-height:0}
+    .p-pal h2 small{flex-basis:100%}
+    .palette{flex:1; min-height:0; grid-template-columns:1fr 1fr; grid-auto-rows:1fr}
+    .cellcard{display:flex; flex-direction:column; justify-content:center; min-height:0}
+    .cellcard svg{flex:1; min-height:0; max-height:74px; height:auto}
+    .bars{flex:1; min-height:0; grid-template-columns:repeat(var(--cols,2),1fr); grid-auto-rows:1fr}
+    .bar{display:flex; min-height:0; min-width:0}
+    .bar svg{width:100%; height:100%}
+    .bar .num{font-size:15px}
+    .bar-ctrl{gap:10px}
+    .seg button{font-size:15px; padding:9px 15px}
+    .btn{font-size:15px}
+    #playBtn{font-size:19px !important; padding:12px 34px !important}
+    .field input{width:170px}
+  }
+  @media (min-width:900px) and (max-width:1450px) and (orientation:landscape){
+    .bar-ctrl{gap:7px} .seg button{font-size:13.5px; padding:8px 10px} .btn{font-size:14px; padding:8px 12px} .field input{width:90px}
+    #playBtn{font-size:17px !important; padding:10px 22px !important}
+  }
+
+  /* 選拍子介面縮小 */
+  .p-pal{padding:8px 10px}
+  .p-pal h2{font-size:13px; margin-bottom:6px}
+  .p-pal h2 small{font-size:11.5px}
+  .palette{grid-template-columns:repeat(5,1fr); gap:6px}
+  .cellcard{border-radius:14px; padding:2px 2px 4px}
+  .cellcard svg{height:36px}
+  .cellcard b{display:none}
+  .cellcard{padding:4px 2px}
+  .cellcard svg{height:44px}
+  .cellcard small{display:none}
+  .cellcard .add{width:21px; height:21px; font-size:13px; right:2px; top:2px}
+  @media (min-width:700px) and (orientation:portrait){ .palette{grid-template-columns:repeat(10,1fr)} }
+  @media (min-width:900px) and (orientation:landscape){
+    .palette{grid-template-columns:1fr 1fr; gap:6px}
+    .cellcard svg{max-height:52px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <header>
+    <h1>拍子練習<small>RHYTHM · 打勾數拍子</small></h1>
+    <a class="btn" href="index.html">← 回音樂盒</a>
+  </header>
+
+  <section class="panel p-pal">
+    <h2>① 選拍子 <small>點＝勾選出題用｜＋ 或拖曳＝放進小節</small></h2>
+    <div class="palette" id="palette"></div>
+  </section>
+
+  <section class="panel p-ctrl">
+    <div class="bar-ctrl">
+      <span class="lab">拍號</span>
+      <div class="seg" id="segSig"><button data-v="2">2/4</button><button data-v="3">3/4</button><button data-v="4" class="on">4/4</button></div>
+      <span class="lab">小節</span>
+      <div class="seg" id="segBars"><button data-v="2">2</button><button data-v="4" class="on">4</button><button data-v="8">8</button></div>
+      <button class="btn primary" id="genBtn">🎲 自動出題</button>
+      <button class="btn" id="clearBtn">清空</button>
+      <label class="field">速度 <input type="range" id="tempo" min="50" max="140" step="2" value="80"><span id="tempoTxt">80</span></label>
+      <div class="seg" id="segTick"><button data-v="on" class="on">節拍聲 開</button><button data-v="off">關</button></div>
+      <div class="seg" id="segSyl"><button data-v="on" class="on">唸法 開</button><button data-v="off">關</button></div>
+      <button class="btn primary" id="playBtn" style="margin-left:auto;font-size:16px;padding:10px 22px">▶ 播放</button>
+    </div>
+  </section>
+
+  <section class="panel p-bars">
+    <h2>② 練習小節 <small>一拍打一個勾 ✓，半拍就是勾勾的一半；點小節裡的音符可以拿掉</small></h2>
+    <div class="bars" id="bars"></div>
+  </section>
+  <p class="msg" id="msg">按「🎲 自動出題」，或自己把拍子卡片放進小節，再按 ▶ 播放聽拍手聲。</p>
+
+  <footer>Ray's Classroom Lab · 班級音樂盒｜Design by Ray Chen／陳耿睿</footer>
+</div>
+<div class="count" id="count"></div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const U = 64, PAD = 10;                                   // 一拍的寬度
+  const CELLS = [
+    {id:'q',   name:'四分音符',   say:['ta'],                 beats:1, notes:[1]},
+    {id:'ee',  name:'兩個八分',   say:['ti','ti'],            beats:1, notes:[.5,.5]},
+    {id:'h',   name:'二分音符',   say:['ta-a'],               beats:2, notes:[2]},
+    {id:'r',   name:'四分休止符', say:['休'],                 beats:1, notes:[1], rest:true},
+    {id:'ssss',name:'四個十六分', say:['ti','ri','ti','ri'],  beats:1, notes:[.25,.25,.25,.25]},
+    {id:'ess', name:'八分＋兩個十六', say:['ti','ti','ri'],   beats:1, notes:[.5,.25,.25]},
+    {id:'sse', name:'兩個十六＋八分', say:['ti','ri','ti'],   beats:1, notes:[.25,.25,.5]},
+    {id:'dqe', name:'附點四分＋八分', say:['ta-i','ti'],      beats:2, notes:[1.5,.5]},
+    {id:'syn', name:'切分音',     say:['ti','ta','ti'],       beats:2, notes:[.5,1,.5]},
+    {id:'w',   name:'全音符',     say:['ta-a-a-a'],           beats:4, notes:[4]}
+  ];
+  const byId = Object.fromEntries(CELLS.map(c => [c.id, c]));
+  let selected = new Set(['q','ee','h','r']), sig = 4, nBars = 4, bars = [], tempo = 80, tickOn = true;
+  let ctx = null, playing = false, t0 = 0, total = 0, raf = 0, stopTimer = 0, noise = null;
+
+  /* ---------- 音符繪製 ---------- */
+  function drawCell(c, x0, yHead, u){
+    u = u || U;
+    let out = '', off = 0;
+    const xs = c.notes.map(d => { const x = x0 + off*u + 18; off += d; return x; });
+    if (c.rest){
+      const x = xs[0]+4, y = yHead;
+      return `<path d="M${x-5} ${y-36} l9 12 l-8 9 l9 11 q-11 -4 -9 8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+    const top = yHead - 40;
+    c.notes.forEach((d, i) => {
+      const x = xs[i], hollow = d >= 2;
+      out += `<ellipse cx="${x}" cy="${yHead}" rx="8.6" ry="6.2" transform="rotate(-20 ${x} ${yHead})" fill="${hollow?'none':'currentColor'}" stroke="currentColor" stroke-width="${hollow?2.6:1}"/>`;
+      if (d < 4) out += `<path d="M${x+7.6} ${yHead-2}V${top}" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>`;
+      if (d === 1.5) out += `<circle cx="${x+17}" cy="${yHead-1}" r="2.6" fill="currentColor"/>`;
+    });
+    // 連桿／符尾
+    let i = 0;
+    while (i < c.notes.length){
+      if (c.notes[i] >= 1){ i++; continue; }
+      let j = i; while (j+1 < c.notes.length && c.notes[j+1] < 1) j++;
+      if (j > i){
+        out += `<path d="M${xs[i]+7.6} ${top+2}H${xs[j]+7.6}" stroke="currentColor" stroke-width="5.5"/>`;
+        let k = i;
+        while (k <= j){
+          if (c.notes[k] === .25){ let m = k; while (m+1 <= j && c.notes[m+1] === .25) m++;
+            const a = xs[k]+7.6, b = m > k ? xs[m]+7.6 : a + (k === i ? 10 : -10);
+            out += `<path d="M${a} ${top+11}H${b}" stroke="currentColor" stroke-width="4.5"/>`; k = m+1; }
+          else k++;
+        }
+      } else {
+        const x = xs[i]+7.6;
+        out += `<path d="M${x} ${top} q2 12 11 17 q4 5 0 13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>`;
+      }
+      i = j+1;
+    }
+    return out;
+  }
+  function cardSVG(c){
+    const u = c.beats === 1 ? U : c.beats === 2 ? 44 : 20, w = c.beats*u + 16;
+    return `<svg viewBox="0 0 110 66" preserveAspectRatio="xMidYMid meet"><g transform="translate(${(110-w)/2} 0)">${drawCell(c, 0, 52, u)}</g></svg>`;
+  }
+
+  /* ---------- 拍子卡片（勾選／拖曳／＋） ---------- */
+  const palette = $('palette');
+  function renderPalette(){
+    palette.innerHTML = CELLS.map(c => `<div class="cellcard${selected.has(c.id)?' on':''}" data-id="${c.id}" role="button" tabindex="0" aria-label="${c.name}" title="${c.name}" aria-pressed="${selected.has(c.id)}">
+      <button class="add" data-add="${c.id}" aria-label="把${c.name}加到小節">＋</button>${cardSVG(c)}<b>${c.name}</b><small>${c.say.join(' ')}｜${c.beats} 拍</small></div>`).join('');
+  }
+  let drag = null;
+  palette.addEventListener('pointerdown', e => {
+    if (e.target.closest('.add')) return;
+    const card = e.target.closest('.cellcard'); if (!card) return;
+    drag = {id:card.dataset.id, card, x:e.clientX, y:e.clientY, moved:false, ghost:null};
+    try { card.setPointerCapture(e.pointerId); } catch(_){}
+  });
+  palette.addEventListener('pointermove', e => {
+    if (!drag) return;
+    if (!drag.moved && Math.hypot(e.clientX-drag.x, e.clientY-drag.y) > 8){
+      drag.moved = true; drag.ghost = drag.card.cloneNode(true); drag.ghost.classList.add('ghost'); document.body.appendChild(drag.ghost);
+    }
+    if (drag.moved){
+      drag.ghost.style.left = e.clientX+'px'; drag.ghost.style.top = e.clientY+'px';
+      const b = barAt(e.clientX, e.clientY);
+      document.querySelectorAll('.bar').forEach(x => x.classList.toggle('drop', x === b));
+    }
+  });
+  function endDrag(e){
+    if (!drag) return;
+    const d = drag; drag = null;
+    document.querySelectorAll('.bar').forEach(x => x.classList.remove('drop'));
+    if (d.ghost) d.ghost.remove();
+    if (d.moved){ const b = barAt(e.clientX, e.clientY); if (b) addTo(+b.dataset.i, d.id); }
+    else toggle(d.id);
+  }
+  palette.addEventListener('pointerup', endDrag);
+  palette.addEventListener('pointercancel', () => { if (drag){ if (drag.ghost) drag.ghost.remove(); drag = null; } });
+  palette.addEventListener('click', e => { const a = e.target.closest('.add'); if (a) addAuto(a.dataset.add); });
+  palette.addEventListener('keydown', e => { const c = e.target.closest('.cellcard'); if (c && (e.key === 'Enter' || e.key === ' ') && !e.target.closest('.add')){ e.preventDefault(); toggle(c.dataset.id); } });
+  function barAt(x, y){ const el = document.elementFromPoint(x, y); return el && el.closest ? el.closest('.bar') : null; }
+  function toggle(id){ selected.has(id) ? selected.delete(id) : selected.add(id); renderPalette(); }
+
+  /* ---------- 小節資料 ---------- */
+  const used = b => b.reduce((a, id) => a + byId[id].beats, 0);
+  function resize(){ bars = Array.from({length:nBars}, (_, i) => (bars[i] || []).filter(Boolean)); bars.forEach((b, i) => { while (used(b) > sig) b.pop(); }); }
+  function addTo(i, id){
+    if (playing) stop();
+    if (used(bars[i]) + byId[id].beats > sig){ say(`第 ${i+1} 小節放不下「${byId[id].name}」（${byId[id].beats} 拍），這一小節只剩 ${sig-used(bars[i])} 拍。`); return false; }
+    bars[i].push(id); renderBars(); say(''); return true;
+  }
+  function addAuto(id){
+    const i = bars.findIndex(b => used(b) + byId[id].beats <= sig);
+    if (i < 0){ say(`小節都滿了，放不下「${byId[id].name}」。可以點小節裡的音符拿掉，或增加小節數。`); return; }
+    addTo(i, id);
+  }
+  function generate(){
+    if (playing) stop();
+    const pool = CELLS.filter(c => selected.has(c.id));
+    if (!pool.length){ say('請先勾選至少一種拍子。'); return; }
+    let lastBar = '';
+    bars = Array.from({length:nBars}, (_, bi) => {
+      for (let tries = 0; tries < 12; tries++){
+        const b = []; let left = sig;
+        while (left > 0){
+          let fit = pool.filter(c => c.beats <= left && !(c.rest && bi === 0 && !b.length) && !(c.rest && b.length && byId[b[b.length-1]].rest));
+          if (!fit.length) fit = pool.filter(c => c.beats <= left);
+          if (!fit.length) fit = [byId.q];
+          const c = fit[Math.floor(Math.random()*fit.length)]; b.push(c.id); left -= c.beats;
+        }
+        if (b.join() !== lastBar || tries === 11){ lastBar = b.join(); return b; }
+      }
+    });
+    renderBars(); say('出好題了！按 ▶ 播放，一起打勾數拍子。');
+  }
+
+  /* ---------- 小節繪製 ---------- */
+  function renderBars(){
+    const W = sig*U + PAD*2, H = 156, yHead = 62, yT = 108, yB = 140;
+    $('bars').style.setProperty('--cols', nBars === 8 ? 4 : 2);
+    $('bars').innerHTML = bars.map((b, bi) => {
+      let x = PAD, beat = 0, notes = '', hits = '', syl = '';
+      const restBeat = new Array(sig).fill(false), filled = new Array(sig).fill(false);
+      b.forEach((id, ci) => {
+        const c = byId[id]; let off = 0;
+        for (let k = 0; k < c.beats; k++){ filled[beat+k] = true; if (c.rest) restBeat[beat+k] = true; }
+        notes += `<g class="note" data-t0="${bi*sig+beat}" data-t1="${bi*sig+beat+c.beats}">${drawCell(c, x, yHead)}</g>`;
+        c.notes.forEach((d, ni) => { syl += `<text class="syl" x="${x+off*U+18}" y="${yHead+24}">${c.say[ni]}</text>`; off += d; });
+        hits += `<rect class="hit" data-b="${bi}" data-c="${ci}" x="${x}" y="6" width="${c.beats*U}" height="${yHead+24}" rx="10"><title>拿掉</title></rect>`;
+        x += c.beats*U; beat += c.beats;
+      });
+      if (beat < sig) notes += `<rect class="empty" x="${x+3}" y="14" width="${(sig-beat)*U-6}" height="${yHead+6}" rx="12"/>`;
+      let chk = '';
+      for (let k = 0; k < sig; k++){
+        const a = PAD + k*U + 8, m = PAD + k*U + U/2, z = PAD + (k+1)*U - 8, cls = 'chk' + (restBeat[k] || !filled[k] ? ' rest' : '');
+        chk += `<path class="${cls}" data-t="${bi*sig+k}" d="M${a} ${yT}L${m} ${yB}"/><path class="${cls}" data-t="${bi*sig+k+.5}" d="M${m} ${yB}L${z} ${yT}"/>`;
+      }
+      return `<div class="bar" data-i="${bi}"><span class="num">${bi+1}</span><svg viewBox="0 0 ${W} ${H}">${notes}${syl}${chk}${hits}</svg></div>`;
+    }).join('');
+  }
+  $('bars').addEventListener('click', e => {
+    const h = e.target.closest('.hit'); if (!h) return;
+    if (playing) stop();
+    bars[+h.dataset.b].splice(+h.dataset.c, 1); renderBars();
+  });
+
+  /* ---------- 聲音：拍手＋節拍聲 ---------- */
+  function ensure(){
+    if (ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    noise = ctx.createBuffer(1, ctx.sampleRate*.3, ctx.sampleRate);
+    const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random()*2-1;
+  }
+  function clap(t){
+    [0, .009, .019].forEach((o, i) => {
+      const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), hp = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = noise; bp.type = 'bandpass'; bp.frequency.value = 1150 + i*120; bp.Q.value = .9; hp.type = 'highpass'; hp.frequency.value = 500;
+      const last = i === 2;
+      g.gain.setValueAtTime(0, t+o); g.gain.linearRampToValueAtTime(last ? .9 : .5, t+o+.002); g.gain.exponentialRampToValueAtTime(.001, t+o+(last ? .16 : .02));
+      s.connect(bp).connect(hp).connect(g).connect(ctx.destination); s.start(t+o); s.stop(t+o+.25);
+    });
+  }
+  function tick(t, strong){
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = strong ? 1320 : 880;
+    g.gain.setValueAtTime(strong ? .16 : .09, t); g.gain.exponentialRampToValueAtTime(.001, t+.07);
+    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+.09);
+  }
+
+  /* ---------- 播放 ---------- */
+  function play(){
+    if (!bars.some(b => b.length)){ say('小節還是空的，先按「🎲 自動出題」或放幾個拍子進去。'); return; }
+    ensure(); if (ctx.state === 'suspended') ctx.resume();
+    const spb = 60/tempo; total = nBars*sig; playing = true;
+    t0 = ctx.currentTime + .15 + sig*spb;                                 // 先數一小節預備拍
+    for (let k = 0; k < sig; k++) tick(t0 - (sig-k)*spb, k === 0);
+    bars.forEach((b, bi) => {
+      let beat = 0;
+      b.forEach(id => { const c = byId[id]; let off = 0;
+        c.notes.forEach(d => { if (!c.rest) clap(t0 + (bi*sig+beat+off)*spb); off += d; }); beat += c.beats; });
+      if (tickOn) for (let k = 0; k < sig; k++) tick(t0 + (bi*sig+k)*spb, k === 0);
+    });
+    $('playBtn').textContent = '■ 停止'; say('聽預備拍…');
+    stopTimer = setTimeout(() => { stop(true); }, (t0 - ctx.currentTime + total*spb + .6)*1000);
+    raf = requestAnimationFrame(frame);
+  }
+  function stop(done){
+    playing = false; clearTimeout(stopTimer); cancelAnimationFrame(raf);
+    if (!done && ctx){ ctx.close(); ctx = null; }                         // 立刻靜音
+    $('playBtn').textContent = '▶ 播放'; $('count').classList.remove('show');
+    document.querySelectorAll('.note.now').forEach(n => n.classList.remove('now'));
+    document.querySelectorAll('.bar.playing').forEach(n => n.classList.remove('playing'));
+    if (!done) document.querySelectorAll('.chk.on').forEach(n => n.classList.remove('on'));
+    say(done ? '拍完了！勾勾都打好了嗎？可以再播一次，或換一題。' : '');
+  }
+  function frame(){
+    if (!playing || !ctx) return;
+    const spb = 60/tempo, nb = (ctx.currentTime - t0)/spb, cnt = $('count');
+    if (nb < 0){ cnt.textContent = Math.min(sig, Math.floor(nb + sig) + 1); cnt.classList.add('show'); }
+    else { cnt.classList.remove('show'); if (nb < total) say('第 ' + (Math.floor(nb/sig)+1) + ' 小節・第 ' + (Math.floor(nb % sig)+1) + ' 拍'); }
+    document.querySelectorAll('.chk').forEach(c => c.classList.toggle('on', nb >= +c.dataset.t));
+    document.querySelectorAll('.note').forEach(n => n.classList.toggle('now', nb >= +n.dataset.t0 && nb < +n.dataset.t1));
+    document.querySelectorAll('.bar').forEach((b, i) => b.classList.toggle('playing', nb >= i*sig && nb < (i+1)*sig));
+    raf = requestAnimationFrame(frame);
+  }
+  $('playBtn').onclick = () => playing ? stop() : play();
+
+  /* ---------- 控制 ---------- */
+  function seg(id, fn){ const el = $(id); el.querySelectorAll('button').forEach(b => b.onclick = () => { el.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); fn(b.dataset.v); }); }
+  seg('segSig',  v => { if (playing) stop(); sig = +v; resize(); renderBars(); });
+  seg('segBars', v => { if (playing) stop(); nBars = +v; resize(); renderBars(); });
+  seg('segTick', v => { tickOn = v === 'on'; });
+  seg('segSyl',  v => { $('wrap').classList.toggle('hide-syl', v === 'off'); });
+  $('tempo').oninput = e => { tempo = +e.target.value; $('tempoTxt').textContent = tempo; if (playing) stop(); };
+  $('genBtn').onclick = generate;
+  $('clearBtn').onclick = () => { if (playing) stop(); bars = bars.map(() => []); renderBars(); say('已清空，可以自己排拍子了。'); };
+  document.addEventListener('keydown', e => { if (e.code === 'Space' && !/INPUT|BUTTON/.test(e.target.tagName)){ e.preventDefault(); $('playBtn').click(); } });
+  function say(t){ $('msg').textContent = t; }
+
+  renderPalette(); resize(); generate();
+  say('按 ▶ 播放聽拍手聲；也可以按「🎲 自動出題」換一題，或自己把拍子卡片放進小節。');
+})();
+</script>
+</body>
+</html>
